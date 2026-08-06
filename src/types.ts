@@ -1,4 +1,4 @@
-export type ThemeMode = 'light' | 'dark' | 'sepia' | 'cyber' | 'custom';
+export type ThemeMode = 'purple' | 'dark' | 'light' | 'sepia' | 'cyber' | 'custom';
 
 export interface CustomThemeColors {
   bg: string;

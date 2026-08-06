@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { ThemeMode, CustomThemeColors, TestResult, UserProfile } from './types';
-import { getStoredProfile, getStoredTests, saveProfile, isTutorialCompleted, setTutorialCompleted, DEFAULT_CUSTOM_COLORS } from './lib/storage';
+import { getStoredProfile, getStoredTests, saveProfile, isTutorialCompleted, setTutorialCompleted, DEFAULT_CUSTOM_COLORS, getStoredThemeMode, saveThemeMode } from './lib/storage';
 import { Header } from './components/Header';
 import { PracticeSession } from './components/PracticeSession';
 import { SimulatedExamTest } from './components/SimulatedExamTest';
@@ -19,8 +19,13 @@ import { ScoreCertificateModal } from './components/ScoreCertificateModal';
 export default function App() {
   // Navigation & Theme
   const [activeTab, setActiveTab] = React.useState<'practice' | 'exam' | 'analytics' | 'warmup' | 'games' | 'leaderboard'>('practice');
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>('dark');
+  const [themeMode, setThemeModeState] = React.useState<ThemeMode>(getStoredThemeMode());
   const [customColors, setCustomColors] = React.useState<CustomThemeColors>(DEFAULT_CUSTOM_COLORS);
+
+  const setThemeMode = (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    saveThemeMode(mode);
+  };
 
   // Profile & Test Data
   const [profile, setProfile] = React.useState<UserProfile>(getStoredProfile());
@@ -29,6 +34,15 @@ export default function App() {
   // Modals & Certificate
   const [isTutorialOpen, setIsTutorialOpen] = React.useState<boolean>(false);
   const [activeResult, setActiveResult] = React.useState<TestResult | null>(null);
+
+  // Sync dark class on root document element
+  React.useEffect(() => {
+    if (themeMode === 'purple' || themeMode === 'dark' || themeMode === 'cyber') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [themeMode]);
 
   // Auto show tutorial for first-time users
   React.useEffect(() => {
@@ -62,14 +76,16 @@ export default function App() {
   let themeStyle: React.CSSProperties = {};
   let themeClass = 'min-h-screen transition-colors duration-200 ';
 
-  if (themeMode === 'light') {
-    themeClass += 'bg-slate-50 text-slate-900';
+  if (themeMode === 'purple') {
+    themeClass += 'theme-purple bg-[#0b0819] text-[#f3ecfe] dark';
+  } else if (themeMode === 'light') {
+    themeClass += 'theme-light bg-slate-50 text-slate-900';
   } else if (themeMode === 'dark') {
-    themeClass += 'bg-slate-950 text-slate-100 dark';
+    themeClass += 'theme-dark bg-[#080d1a] text-slate-100 dark';
   } else if (themeMode === 'sepia') {
-    themeClass += 'bg-[#fbf0d9] text-[#433422]';
+    themeClass += 'theme-sepia bg-[#f7f0e3] text-[#2c1f10]';
   } else if (themeMode === 'cyber') {
-    themeClass += 'bg-[#090d16] text-[#34d399] dark';
+    themeClass += 'theme-cyber bg-[#030b06] text-[#34d399] dark';
   } else if (themeMode === 'custom') {
     themeStyle = {
       backgroundColor: customColors.bg,

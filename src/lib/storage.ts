@@ -1,4 +1,4 @@
-import { TestResult, UserProfile, LeaderboardEntry, CustomThemeColors, KeyStat } from '../types';
+import { TestResult, UserProfile, LeaderboardEntry, CustomThemeColors, KeyStat, ThemeMode } from '../types';
 
 const STORAGE_KEYS = {
   PROFILE: 'cpct_user_profile_v1',
@@ -9,6 +9,24 @@ const STORAGE_KEYS = {
   KEY_STATS: 'cpct_key_stats_v1',
   TUTORIAL_COMPLETED: 'cpct_tutorial_completed_v1'
 };
+
+export function getStoredThemeMode(): ThemeMode {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.THEME_MODE);
+    if (raw) return raw as ThemeMode;
+  } catch (e) {
+    console.error('Error reading theme mode:', e);
+  }
+  return 'purple';
+}
+
+export function saveThemeMode(mode: ThemeMode): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME_MODE, mode);
+  } catch (e) {
+    console.error('Error saving theme mode:', e);
+  }
+}
 
 const DEFAULT_PROFILE: UserProfile = {
   id: 'user_1',

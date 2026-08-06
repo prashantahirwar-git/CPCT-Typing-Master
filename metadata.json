@@ -1,0 +1,6 @@
+{
+  "name": "CPCT Typing Master",
+  "description": "A comprehensive typing master app for CPCT exam preparation featuring practice sessions, simulated speed tests, analytics, voice-guided warmups, gamified challenges, custom themes, and local storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

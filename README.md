@@ -1,20 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# CPCT Typing Master
 
-# Run and deploy your AI Studio app
+A comprehensive typing application designed for MP CPCT (Computer Proficiency Certification Test) exam preparation.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/e2079bba-6e20-4940-ae80-bc36cdb48794
+- **English & Hindi Typing Practice**: Practice with official CPCT level passages and 1-minute speed sprints.
+- **Simulated Exam Environment**: Realistic CPCT exam simulation with timer, WPM/NWPM calculations, and accuracy metrics.
+- **CPCT Computer Proficiency Quiz**: MCQ practice covering Computer Fundamentals, MS Office, Hardware & Security, Networking, and General Knowledge in both Hindi and English.
+- **Performance Analytics**: Track typing speed, accuracy history, and exam progress.
+- **Voice Warmup & Games**: Exercises and interactive typing games to improve speed and finger agility.
+- **Customization**: Dark/Light mode and custom color theme customization.
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS
+- Lucide React Icons

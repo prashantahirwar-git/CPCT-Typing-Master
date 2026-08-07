@@ -9,6 +9,7 @@ import { getStoredProfile, getStoredTests, saveProfile, isTutorialCompleted, set
 import { Header } from './components/Header';
 import { PracticeSession } from './components/PracticeSession';
 import { SimulatedExamTest } from './components/SimulatedExamTest';
+import { CPCTQuizSection } from './components/CPCTQuizSection';
 import { PerformanceDashboard } from './components/PerformanceDashboard';
 import { WarmupVoiceSection } from './components/WarmupVoiceSection';
 import { GamifiedChallenges } from './components/GamifiedChallenges';
@@ -18,7 +19,7 @@ import { ScoreCertificateModal } from './components/ScoreCertificateModal';
 
 export default function App() {
   // Navigation & Theme
-  const [activeTab, setActiveTab] = React.useState<'practice' | 'exam' | 'analytics' | 'warmup' | 'games' | 'leaderboard'>('practice');
+  const [activeTab, setActiveTab] = React.useState<'practice' | 'exam' | 'quiz' | 'analytics' | 'warmup' | 'games' | 'leaderboard'>('practice');
   const [themeMode, setThemeModeState] = React.useState<ThemeMode>(getStoredThemeMode());
   const [customColors, setCustomColors] = React.useState<CustomThemeColors>(DEFAULT_CUSTOM_COLORS);
 
@@ -57,6 +58,9 @@ export default function App() {
   }, []);
 
   const handleFinishTest = (result: TestResult) => {
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
     setActiveResult(result);
     refreshData();
   };
@@ -109,7 +113,7 @@ export default function App() {
       />
 
       {/* Main View Container */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-8">
         {activeTab === 'practice' && (
           <PracticeSession onFinishPractice={handleFinishTest} />
         )}
@@ -119,6 +123,10 @@ export default function App() {
             studentName={profile.name}
             onExamComplete={handleFinishTest}
           />
+        )}
+
+        {activeTab === 'quiz' && (
+          <CPCTQuizSection />
         )}
 
         {activeTab === 'analytics' && (
@@ -167,7 +175,10 @@ export default function App() {
       <ScoreCertificateModal
         result={activeResult}
         studentName={profile.name}
-        onClose={() => setActiveResult(null)}
+        onClose={() => {
+          setActiveResult(null);
+          setActiveTab('analytics');
+        }}
         onRetry={() => {
           setActiveResult(null);
         }}

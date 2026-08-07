@@ -35,8 +35,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   };
 
   return (
-    <div className="relative inline-block text-left">
-      <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div className="relative inline-block text-left max-w-full">
+      <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 max-w-[150px] xs:max-w-[220px] sm:max-w-none overflow-x-auto whitespace-nowrap scrollbar-none">
         {themes.map((t) => {
           const isSelected = currentTheme === t.id;
           return (
@@ -47,14 +47,14 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                 if (t.id === 'custom') setShowCustomModal(true);
               }}
               title={t.desc}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${
                 isSelected
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
               }`}
             >
               {t.icon}
-              <span className="hidden sm:inline">{t.name}</span>
+              <span className="text-xs font-semibold whitespace-nowrap">{t.name}</span>
             </button>
           );
         })}

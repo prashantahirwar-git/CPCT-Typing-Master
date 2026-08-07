@@ -37,7 +37,7 @@ export const ScoreCertificateModal: React.FC<ScoreCertificateModalProps> = ({
   const isGradeC = result.netWPM >= 30 && result.netWPM < 40;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
       <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative text-slate-900 dark:text-white animate-in zoom-in-95 duration-200 my-8">
         {/* Close */}
         <button

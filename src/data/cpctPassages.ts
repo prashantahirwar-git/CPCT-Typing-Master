@@ -16,6 +16,46 @@ export const CPCT_PASSAGES: CPCTPassage[] = [
   
   // 1 Minute English Sprints
   {
+    id: 'eng-paper-search-engine',
+    title: 'Official CPCT Paper - Search Engines & Web Crawlers',
+    language: 'english',
+    category: 'CPCT Official Level',
+    difficulty: 'Medium',
+    recommendedDurationMinutes: 5,
+    wordCount: 165,
+    content: `A search engine is a tool used to find data based on a particular input. Web search engines are one example where you can enter a word or phrase to find web pages that match those terms. Not every web search engine works the same way. Most of them are crawler based. It means that they actively seek the web for pages to add to their index. The search engine is what you use to quickly lookup information from the index and display the results on the page. Search engines are the primary method for browsing the web and there are many different kinds that are built for finding specific information. Within each search engine are often advanced search options that are used to focus your search better and help you find what you are looking for. Search engines automatically create website listings by using software often called spiders or spiderbots. These spiderbots crawl web pages. They follow a link of site to other pages and index the information in the process.`
+  },
+  {
+    id: 'eng-paper-environmental',
+    title: 'Official CPCT Paper - Environmental Conservation',
+    language: 'english',
+    category: 'CPCT Official Level',
+    difficulty: 'Hard',
+    recommendedDurationMinutes: 5,
+    wordCount: 180,
+    content: `Environmental conservation is a close relationship to the life of all creatures and the entire natural environment of this earth. Due to pollution the whole earth is being corrupted and in the near future the end of human civilization is visible. Virtually the protection of the environment can be the preservation of life on earth otherwise the planets like Mars will also end life cycle one day. There are some far reaching side effects of environmental pollution which are extremely fatal such as genetic effects of radioactivity from molecular explosions increased temperature of the atmosphere loss of ozone layer are such deadly side effects. As a direct side effect water air and pollution of the environment and destruction of vegetation human beings are being seen from many new diseases.`
+  },
+  {
+    id: 'hin-paper-paropkar',
+    title: 'ऑफिशियल सीपीसीटी पेपर - परोपकार एवं सामाजिक प्राणी',
+    language: 'hindi',
+    category: 'CPCT Official Level',
+    difficulty: 'Medium',
+    recommendedDurationMinutes: 5,
+    wordCount: 160,
+    content: `परोपकार यानी दूसरो का भला करना। पर और उपकार को जोडकर परोपकार बनता है। यह दो पदों को मिलाकर परोपकार बनता है। इंसानियत और मानवता की भावना परोपकार कहलाता है। इंसान एक समाजिक प्राणी है। जब किसी को मदद की जरूरत होती है और कोई भला इंसान उसकी सही समय पर मदद करता है उसे परोपकार कहते है। परोपकारी इंसान बिना किसी लोभ के दूसरे लोगो की सेवा अथवा सहायता करता है। उसके मन में सबके प्रति प्रेम भावना रहती है। वह किसी भी आदमी को परेशानी में नहीं देख सकता है। परोपकार इंसान समाज में प्रेम संदेश और भाईचारा फैलाता है।`
+  },
+  {
+    id: 'hin-paper-kaushal',
+    title: 'ऑफिशियल सीपीसीटी पेपर - कौशल विकास एवं सफलता',
+    language: 'hindi',
+    category: 'CPCT Official Level',
+    difficulty: 'Medium',
+    recommendedDurationMinutes: 5,
+    wordCount: 155,
+    content: `सफलता जादू से नहीं मिलती है। सफल होने के लिए जरूरी कौशल की जरूरत होती है। यह सच नई पीढी पर भी उतना ही लागू होता है। युवा बल किसी भी देश के सामाजिक विकास को गति देने वाली ताकत बन सकती है। यदि उसे प्रभावी रूप से दिशा दी जाए। कौशल विकास और रोजगार इस ताकत को आगे बढाने के सबसे बढिया साधन हैं। युवा आबादी के मामले में भारत के पास दुनिया का सबसे अधिक आबादी है। फिर भी भारतीय नियोग करने वाला कुशल मानव एकता की कमी से जूझ रहा हैं।`
+  },
+  {
     id: 'eng-1m-1',
     title: '1-Min English Sprint - Home Row & Fundamentals',
     language: 'english',
@@ -118,7 +158,81 @@ Furthermore, rhythm and relaxation are essential for sustaining typing speed ove
 As government departments shift towards paperless office environments, digital document management, spreadsheet calculations, and electronic correspondence have become daily routines. Candidates who demonstrate superior typing speed along with error-free key entry consistently perform better in competitive selection lists.`
   },
 
-  // 15 Minutes English CPCT Full Exam Standard
+  // Additional English Practice Passages
+  {
+    id: 'eng-3m-3',
+    title: '3-Min English - General Computer & Office Knowledge',
+    language: 'english',
+    category: 'General Knowledge',
+    difficulty: 'Easy',
+    recommendedDurationMinutes: 3,
+    wordCount: 130,
+    content: `Computer networks allow multiple systems to share information, printers, and storage drives across office departments. The Internet uses TCP/IP protocols to transmit data packets reliably across global servers. Operating systems manage system hardware, file directories, and application memory efficiently.
+
+Keyboarding skills are essential for administrative professionals handling daily email correspondence, report creation, and database management. Developing muscle memory for home row keys enables typists to maintain high accuracy without looking down at the keyboard layout.`
+  },
+  {
+    id: 'eng-5m-3',
+    title: '5-Min English - Revenue & Land Survey Department',
+    language: 'english',
+    category: 'Government Office',
+    difficulty: 'Medium',
+    recommendedDurationMinutes: 5,
+    wordCount: 220,
+    content: `Land revenue administration in state departments involves digitized record management and field verification reports. Revenue inspectors update survey numbers, land ownership titles, and agricultural crop assessment logs in centralized cloud databases.
+
+Modern e-district portals streamline public applications for land mutation, income certificates, and domicile proofs. Clerical staff responsible for typing survey details must verify names, parcel measurements, and registration dates accurately to prevent legal disputes.
+
+Regular touch typing practice improves typing speed and reduces fatigue during long shifts. Focus on maintaining a steady cadence and keeping your wrists relaxed while navigating letter keys, punctuation marks, and number rows.`
+  },
+  {
+    id: 'eng-1m-3',
+    title: '1-Min English - Numbers & Symbols Drill',
+    language: 'english',
+    category: 'Numbers & Symbols',
+    difficulty: 'Hard',
+    recommendedDurationMinutes: 1,
+    wordCount: 45,
+    content: `Memo No. 4082/IT-2026 dated 15th August allocated Rs. 12,50,000/- for 45 new desktop computers. Order #892-B verified 100% compliance under Section 12(A) of State Revenue Act @5.5% tax rate.`
+  },
+
+  // Additional Hindi Practice Passages
+  {
+    id: 'hin-3m-3',
+    title: '3-मिनट हिंदी - कंप्यूटर एवं इंटरनेट सामान्य ज्ञान',
+    language: 'hindi',
+    category: 'General Knowledge',
+    difficulty: 'Easy',
+    recommendedDurationMinutes: 3,
+    wordCount: 125,
+    content: `कंप्यूटर नेटवर्क विभिन्न कार्यालयों के बीच सूचनाओं, फाइलों और प्रिंटर उपकरणों का आदान-प्रदान सुलभ बनाते हैं। इंटरनेट आधुनिक संचार का सबसे शक्तिशाली माध्यम है जो ईमेल, वेबसाइटों और ई-गवर्नेंस सेवाओं को त्वरित गति से जोड़ता है।
+
+शासकीय एवं निजी क्षेत्रों में कंप्यूटर ऑपरेटरों के लिए कीबोर्ड टाइपिंग का ज्ञान अत्यंत आवश्यक है। होम रो कुंजियों पर उंगलियों को सही स्थिति में रखकर नियमित अभ्यास करने से टाइपिंग गति में सुधार होता है और त्रुटियां न्यूनतम हो जाती हैं।`
+  },
+  {
+    id: 'hin-5m-3',
+    title: '5-मिनट हिंदी - भू-अभिलेख एवं राजस्व प्रबंधन',
+    language: 'hindi',
+    category: 'Government Office',
+    difficulty: 'Medium',
+    recommendedDurationMinutes: 5,
+    wordCount: 210,
+    content: `राजस्व विभाग में भू-अभिलेखों के डिजिटलीकरण से भूमि स्वामित्व संबंधी प्रविष्टियों को ऑनलाइन देखना अत्यंत सरल हो गया है। खसरा-खतौनी की प्रतिलिपियों को अद्यतन करने के लिए कलेक्टोरेट एवं तहसील कार्यालयों में डाटा प्रविष्टि का कार्य निरंतर चलता रहता है।
+
+नागरिकों को लोक सेवा गारंटी अधिनियम के अंतर्गत समयबद्ध सेवाएं प्रदान की जा रही हैं। डाटा प्रविष्टि सहायक को चाहिए कि वह आवेदक का नाम, खसरा नंबर और भूमि का क्षेत्रफल दर्ज करते समय पूर्ण सतर्कता बरतें ताकि भविष्य में कोई विवाद न हो।
+
+हिंदी टाइपिंग का निरंतर अभ्यास करने से कीबोर्ड लेआउट की उंगलियों की पकड़ मजबूत होती है। प्रतिदिन विभिन्न गद्यांशों पर अभ्यास करने से परीक्षा हॉल का तनाव कम होता है और आत्मविश्वास बढ़ता है।`
+  },
+  {
+    id: 'hin-1m-3',
+    title: '1-मिनट हिंदी - संख्या एवं प्रतीक अभ्यास',
+    language: 'hindi',
+    category: 'Numbers & Symbols',
+    difficulty: 'Hard',
+    recommendedDurationMinutes: 1,
+    wordCount: 40,
+    content: `शासकीय ज्ञापन क्रमांक ४५०/राजस्व-२०२६ दिनांक १५ अगस्त द्वारा रु १२,५०,०००/- की राशि स्वीकृत की गई। धारा १२(अ) के तहत १००% सत्यापन पूर्ण हुआ।`
+  },
   {
     id: 'eng-15m-1',
     title: '15-Min English Exam - Official MP CPCT Master Paper',

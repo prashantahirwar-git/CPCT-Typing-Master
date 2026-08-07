@@ -280,3 +280,50 @@
   }
 }
 
+/* Mobile Landscape Split Layout (Mobiles ONLY: max-height <= 520px and max-width <= 950px in landscape) */
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 950px) {
+  /* Reduce main padding on rotated mobile screens */
+  main {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Two-Column Side-by-Side Split Grid for Mobile Landscape */
+  .mobile-landscape-split {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+    align-items: stretch !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Left Column: Target Passage / Text Stream Box */
+  .practice-text-box, .exam-text-box {
+    max-height: 150px !important;
+    min-height: 100px !important;
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Right Column: Input Text Area */
+  .mobile-landscape-input {
+    height: 100% !important;
+    min-height: 100px !important;
+    max-height: 150px !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Compact virtual keyboard scaling for rotated mobile screens */
+  .virtual-keyboard-container {
+    transform: scale(0.70);
+    transform-origin: top center;
+    margin-top: -1rem !important;
+    margin-bottom: -1.5rem !important;
+  }
+}
+

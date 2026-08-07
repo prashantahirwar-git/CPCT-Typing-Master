@@ -1,82 +1,100 @@
 import React from 'react';
 import { soundEngine } from '../lib/audio';
-import { Gamepad2, Flame, ShieldAlert, Trophy, Play, RotateCcw, Zap, Sparkles, Clock, Target, ArrowRight, Award, ChevronRight, Keyboard } from 'lucide-react';
+import { Gamepad2, Flame, ShieldAlert, Trophy, Play, RotateCcw, Zap, Sparkles, Clock, Target, ArrowRight, Award, ChevronRight, Keyboard, Activity, Gauge } from 'lucide-react';
 
 interface GamifiedChallengesProps {
   onAwardBadge?: (badgeId: string) => void;
 }
 
-// Word Banks for Falling Meteor Defender categorized by difficulty
-const EASY_WORDS = ['cpct', 'exam', 'test', 'type', 'hand', 'fast', 'home', 'font', 'desk', 'keys', 'form', 'page', 'code', 'data', 'text'];
-const MEDIUM_WORDS = ['speed', 'rhythm', 'anchor', 'finger', 'system', 'record', 'office', 'mponline', 'result', 'script', 'smooth', 'typing', 'report', 'format'];
-const HARD_WORDS = ['accuracy', 'keyboard', 'district', 'governor', 'computer', 'practice', 'guidance', 'hardware', 'network', 'tactical', 'training'];
-const EXTREME_WORDS = ['certification', 'mponline2026', 'government', 'proficiency', 'qualification', 'cpctmaster2026', 'typingmaster'];
+// Word Banks for Falling Word Defender
+const EASY_WORDS = ['cpct', 'exam', 'test', 'type', 'hand', 'fast', 'home', 'font', 'desk', 'keys', 'form', 'page', 'code', 'data', 'text', 'line', 'user', 'word', 'time', 'gold'];
+const MEDIUM_WORDS = ['speed', 'rhythm', 'anchor', 'finger', 'system', 'record', 'office', 'mponline', 'result', 'script', 'smooth', 'typing', 'report', 'format', 'screen', 'layout'];
+const HARD_WORDS = ['accuracy', 'keyboard', 'district', 'governor', 'computer', 'practice', 'guidance', 'hardware', 'network', 'tactical', 'training', 'protocol', 'statute'];
+const EXTREME_WORDS = ['certification', 'mponline2026', 'government', 'proficiency', 'qualification', 'cpctmaster2026', 'typingmaster', 'administration', 'jurisdiction'];
 
-// Accuracy Streak Targets by Level
+// 12 Unique Increasing Difficulty Levels for Game 2 (Accuracy Streak Sprint)
 const STREAK_LEVELS = [
   {
     level: 1,
-    name: 'Easy: Home Row Warmup',
-    timeGoal: 15,
-    text: 'asdf jkl; cpct exam fast hand type home keys font test form page data text'
+    name: 'Level 1: Home Row Baseline',
+    text: 'asdf jkl; asdf jkl; a s d f j k l ;'
   },
   {
     level: 2,
-    name: 'Medium: CPCT Sentences',
-    timeGoal: 30,
-    text: 'The CPCT typing test evaluates net speed and accuracy under 15 minutes of continuous typing.'
+    name: 'Level 2: Top Row Keys',
+    text: 'qwer tyui op qwert yuiop q w e r t y u i o p'
   },
   {
     level: 3,
-    name: 'Hard: Capitals & Numbers',
-    timeGoal: 45,
-    text: 'In 2026, candidates must achieve 30+ Net WPM (Grade C) or 50+ Net WPM (Grade A) in English.'
+    name: 'Level 3: Bottom Row Keys',
+    text: 'zxcv bnm zxcvbnm z x c v b n m'
   },
   {
     level: 4,
-    name: 'Master: Complex Alphanumeric',
-    timeGoal: 60,
-    text: 'CPCT_Cert#2026 @Govt_Office - Net WPM = (Gross - Uncorrected_Errors) / 15_Minutes * 100%'
+    name: 'Level 4: Full Alphabet Flow',
+    text: 'the quick brown fox jumps over the lazy dog'
+  },
+  {
+    level: 5,
+    name: 'Level 5: Capitalization & Shift Keys',
+    text: 'CPCT Exam Practice Madhya Pradesh Online Govt Test'
+  },
+  {
+    level: 6,
+    name: 'Level 6: Number Row Drills',
+    text: '12345 67890 98765 43210 2026 15min 30wpm'
+  },
+  {
+    level: 7,
+    name: 'Level 7: Punctuation & Symbols',
+    text: 'typing.speed = (words - errors) / time; // test!'
+  },
+  {
+    level: 8,
+    name: 'Level 8: Alphanumeric Official Codes',
+    text: 'MP-GOVT-2026 @Dept_IT #Desk_30 WPM_45%'
+  },
+  {
+    level: 9,
+    name: 'Level 9: Revenue Collectorate Sentences',
+    text: 'Collectorate District Office Branch Entry No. 894/2026.'
+  },
+  {
+    level: 10,
+    name: 'Level 10: Master Overdrive Mix',
+    text: 'CPCT_Master! 50+ WPM @Grade-A Certificate [100% Accuracy]'
+  },
+  {
+    level: 11,
+    name: 'Level 11: Hindi Remington/Inscript Warmup',
+    text: 'क ख ग घ ङ च छ ज झ ञ ट ठ ड ढ ण त थ द ध न प फ ब भ म'
+  },
+  {
+    level: 12,
+    name: 'Level 12: Supreme Speed Master',
+    text: 'IN THE HIGH COURT OF MP: WRIT PETITION NO. 4082/2026 @100%'
   }
 ];
 
-// Boss Rush Stages
-const BOSS_PHASES = [
-  {
-    phase: 1,
-    title: 'Phase 1: Examiner Warmup',
-    bossName: 'CPCT Senior Examiner',
-    targetPhrase: 'Computer Proficiency Certification Test MP Online Government Exam 2026',
-    timeLimit: 60,
-    maxHp: 500,
-  },
-  {
-    phase: 2,
-    title: 'Phase 2: Speed Rush Surge',
-    bossName: 'CPCT Chief Evaluator',
-    targetPhrase: 'Net Typing Speed = Gross WPM minus Penalty for Uncorrected Misspelled Words',
-    timeLimit: 45,
-    maxHp: 400,
-  },
-  {
-    phase: 3,
-    title: 'Phase 3: FINAL OVERDRIVE FINISHER!',
-    bossName: 'CPCT Overdrive Examiner AI',
-    targetPhrase: 'Mastering 50+ WPM with 100% Accuracy unlocks Grade A Certificate for Govt Positions!',
-    timeLimit: 30,
-    maxHp: 300,
-  }
+// CPCT Turbo Speedometer Sentences Stream for Game 3
+const TURBO_SENTENCES = [
+  'Madhya Pradesh CPCT examination evaluates net speed and accuracy under 15 minutes of continuous typing.',
+  'Maintaining rhythmic touch typing on the home row keys drastically improves typing WPM and reduces finger stress.',
+  'Public sector governance relies heavily on error-free digital document entries, e-offices, and land revenue databases.',
+  'Achieving 50+ Net WPM unlocks Grade A Certification for computer operators and stenographer positions in MP Govt.',
+  'Regular typing speed sprints with dynamic WPM feedback build supreme confidence and eliminate exam day anxiety.'
 ];
 
 export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardBadge }) => {
-  const [activeGame, setActiveGame] = React.useState<'none' | 'meteor' | 'streak' | 'boss'>('none');
+  const [activeGame, setActiveGame] = React.useState<'none' | 'meteor' | 'streak' | 'turbo'>('none');
 
   // ==========================================
-  // GAME 1: FALLING WORD DEFENDER (SMOOTH 60FPS)
+  // GAME 1: FALLING WORD DEFENDER (CONTINUOUS UNTIL 0 LIVES)
   // ==========================================
   const [words, setWords] = React.useState<{ id: number; text: string; top: number; left: number; speed: number; level: number }[]>([]);
   const [typedInput, setTypedInput] = React.useState('');
   const [score, setScore] = React.useState(0);
+  const [wordsDestroyed, setWordsDestroyed] = React.useState(0);
   const [combo, setCombo] = React.useState(1);
   const [lives, setLives] = React.useState(3);
   const [isGameOver, setIsGameOver] = React.useState(false);
@@ -85,7 +103,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
   const [explosions, setExplosions] = React.useState<{ id: number; left: number; top: number; text: string }[]>([]);
 
   // Calculate current difficulty tier based on time survived in Meteor Defender
-  const meteorLevel = Math.min(4, Math.floor(meteorGameTime / 15) + 1);
+  const meteorLevel = Math.min(5, Math.floor(meteorGameTime / 15) + 1);
 
   const reqRef = React.useRef<number | null>(null);
   const lastTimeRef = React.useRef<number>(0);
@@ -100,7 +118,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
     ];
   };
 
-  // Smooth 60FPS Game Loop using requestAnimationFrame
+  // Smooth Game Loop using requestAnimationFrame
   const updateMeteorGame = (timestamp: number) => {
     if (!lastTimeRef.current) lastTimeRef.current = timestamp;
     const delta = (timestamp - lastTimeRef.current) / 1000; // in seconds
@@ -110,12 +128,12 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
       // Update survival time
       setMeteorGameTime(t => t + delta);
 
-      const level = Math.min(4, Math.floor(meteorGameTime / 15) + 1);
-      const fallSpeedPercentPerSec = level === 1 ? 7 : level === 2 ? 11 : level === 3 ? 17 : 24;
-      const spawnIntervalSec = level === 1 ? 2.2 : level === 2 ? 1.6 : level === 3 ? 1.2 : 0.8;
-      const maxWords = level + 2;
+      const level = Math.min(5, Math.floor(meteorGameTime / 15) + 1);
+      const fallSpeedPercentPerSec = level === 1 ? 7 : level === 2 ? 11 : level === 3 ? 16 : level === 4 ? 22 : 28;
+      const spawnIntervalSec = level === 1 ? 2.2 : level === 2 ? 1.6 : level === 3 ? 1.2 : level === 4 ? 0.9 : 0.7;
+      const maxWords = Math.min(6, level + 2);
 
-      // Spawn check
+      // Continuous infinite spawn check
       if (timestamp - lastSpawnRef.current > spawnIntervalSec * 1000) {
         lastSpawnRef.current = timestamp;
         setWords(prev => {
@@ -123,7 +141,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
             let pool = EASY_WORDS;
             if (level === 2) pool = [...EASY_WORDS, ...MEDIUM_WORDS];
             else if (level === 3) pool = [...MEDIUM_WORDS, ...HARD_WORDS];
-            else if (level === 4) pool = [...HARD_WORDS, ...EXTREME_WORDS];
+            else if (level >= 4) pool = [...HARD_WORDS, ...EXTREME_WORDS];
 
             const randomWord = pool[Math.floor(Math.random() * pool.length)];
             const newWord = {
@@ -141,19 +159,13 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
       }
 
       // Update position smoothly
+      let hitBottom = false;
       setWords(prevWords => {
         const nextWords: typeof prevWords = [];
         for (const w of prevWords) {
           const newTop = w.top + w.speed * delta;
           if (newTop >= 82) {
-            // Reached bottom - lose life!
-            soundEngine.playError();
-            setLives(l => {
-              const nl = l - 1;
-              if (nl <= 0) setIsGameOver(true);
-              return Math.max(0, nl);
-            });
-            setCombo(1); // Reset combo
+            hitBottom = true;
           } else {
             nextWords.push({ ...w, top: newTop });
           }
@@ -161,12 +173,24 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
         return nextWords;
       });
 
+      if (hitBottom) {
+        soundEngine.playError();
+        setCombo(1);
+        setLives(l => Math.max(0, l - 1));
+      }
+
       reqRef.current = requestAnimationFrame(updateMeteorGame);
     } else if (activeGame === 'meteor' && !isGameOver && !hasStartedTypingMeteor) {
       // Waiting for first keystroke - keep loop alive
       reqRef.current = requestAnimationFrame(updateMeteorGame);
     }
   };
+
+  React.useEffect(() => {
+    if (activeGame === 'meteor' && lives <= 0 && !isGameOver) {
+      setIsGameOver(true);
+    }
+  }, [activeGame, lives, isGameOver]);
 
   React.useEffect(() => {
     if (activeGame === 'meteor' && !isGameOver) {
@@ -192,7 +216,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
       setHasStartedTypingMeteor(true);
     }
 
-    // Check if input matches any word exactly
+    // Check if input matches any falling word exactly
     const matchedIdx = words.findIndex(w => w.text === val);
     if (matchedIdx !== -1) {
       const matched = words[matchedIdx];
@@ -206,6 +230,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
       const points = 10 * matched.level * combo;
       setScore(s => s + points);
+      setWordsDestroyed(w => w + 1);
       setCombo(c => Math.min(5, c + 1));
       setTypedInput('');
       setWords(prev => prev.filter((_, idx) => idx !== matchedIdx));
@@ -220,6 +245,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
     setActiveGame('meteor');
     setWords(generateInitialMeteorWords());
     setScore(0);
+    setWordsDestroyed(0);
     setCombo(1);
     setLives(3);
     setIsGameOver(false);
@@ -231,7 +257,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
 
   // ==========================================
-  // GAME 2: ACCURACY STREAK SPRINT (TIME + DIFFICULTY)
+  // GAME 2: ACCURACY STREAK SPRINT (10+ LEVELS, WRONG KEY RESETS TO LEVEL 1)
   // ==========================================
   const [streakStageIdx, setStreakStageIdx] = React.useState(0);
   const [streakCount, setStreakCount] = React.useState(0);
@@ -247,18 +273,11 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
   React.useEffect(() => {
     if (activeGame !== 'streak' || !hasStartedTypingStreak) return;
     const interval = setInterval(() => {
-      setStreakTimer(t => {
-        const next = t + 1;
-        if (next >= currentStreakLevel.timeGoal && streakStageIdx < STREAK_LEVELS.length - 1) {
-          setStreakStageIdx(s => s + 1);
-          setStreakInput('');
-        }
-        return next;
-      });
+      setStreakTimer(t => t + 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeGame, hasStartedTypingStreak, streakStageIdx, currentStreakLevel]);
+  }, [activeGame, hasStartedTypingStreak]);
 
   const handleStreakInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -277,28 +296,32 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
     if (expectedChar === actualChar) {
       soundEngine.playKeyPress();
       setStreakError(false);
-      setStreakCount(s => {
-        const next = s + 1;
-        if (next > bestStreak) setBestStreak(next);
-        if (next >= 100 && onAwardBadge) onAwardBadge('streak_100');
-        return next;
-      });
+      const nextCount = streakCount + 1;
+      setStreakCount(nextCount);
+      if (nextCount > bestStreak) setBestStreak(nextCount);
+      if (nextCount >= 100 && onAwardBadge) onAwardBadge('streak_100');
 
-      // Complete current stage
+      // Complete current stage -> Advance to next difficulty level!
       if (val.length >= targetText.length) {
         soundEngine.playSuccessFanfare();
         if (streakStageIdx < STREAK_LEVELS.length - 1) {
           setStreakStageIdx(s => s + 1);
           setStreakInput('');
         } else {
+          // Mastered all 12 levels! Loop around with higher speed requirement
+          setStreakStageIdx(0);
+          setStreakInput('');
           if (onAwardBadge) onAwardBadge('streak_master');
         }
       }
     } else {
+      // WRONG KEY PRESSED -> RESET STREAK AND RESTART FROM LEVEL 1!
       soundEngine.playError();
       setStreakError(true);
-      setStreakCount(0); // Reset streak on mistake
-      setTimeout(() => setStreakError(false), 400);
+      setStreakCount(0); // Reset streak counter
+      setStreakStageIdx(0); // RESTART FROM DIFFICULTY LEVEL 1
+      setStreakInput(''); // Clear input
+      setTimeout(() => setStreakError(false), 800);
     }
   };
 
@@ -314,245 +337,249 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
 
   // ==========================================
-  // GAME 3: BOSS RUSH SPRINT (EXAMINER FIGHT)
+  // GAME 3: CPCT TURBO WPM SPEEDOMETER SURGE (45-SEC SPEED BLITZ)
   // ==========================================
-  const [bossPhaseIdx, setBossPhaseIdx] = React.useState(0);
-  const [bossHp, setBossHp] = React.useState(BOSS_PHASES[0].maxHp);
-  const [bossTimer, setBossTimer] = React.useState(BOSS_PHASES[0].timeLimit);
-  const [hasStartedTypingBoss, setHasStartedTypingBoss] = React.useState(false);
-  const [bossInput, setBossInput] = React.useState('');
-  const [bossLogs, setBossLogs] = React.useState<string[]>(['Battle Ready! Type the target phrase to strike the Examiner!']);
-  const [isBossDefeated, setIsBossDefeated] = React.useState(false);
-  const [isBossTimeUp, setIsBossTimeUp] = React.useState(false);
-  const [bossDamageEffect, setBossDamageEffect] = React.useState<number | null>(null);
+  const [turboTimer, setTurboTimer] = React.useState(45);
+  const [hasStartedTypingTurbo, setHasStartedTypingTurbo] = React.useState(false);
+  const [isTurboFinished, setIsTurboFinished] = React.useState(false);
+  const [sentenceIdx, setSentenceIdx] = React.useState(0);
+  const [turboInput, setTurboInput] = React.useState('');
+  const [totalTypedChars, setTotalTypedChars] = React.useState(0);
+  const [correctTypedChars, setCorrectTypedChars] = React.useState(0);
+  const [nitroCombo, setNitroCombo] = React.useState(0);
+  const [peakWpm, setPeakWpm] = React.useState(0);
 
-  const currentBossPhase = BOSS_PHASES[bossPhaseIdx] || BOSS_PHASES[0];
+  const activeTurboSentence = TURBO_SENTENCES[sentenceIdx % TURBO_SENTENCES.length];
 
-  // Boss Countdown Timer - ONLY ticks when user starts typing
+  // Calculate live WPM
+  const timeElapsedMin = Math.max(0.05, (45 - turboTimer) / 60);
+  const liveNetWpm = hasStartedTypingTurbo
+    ? Math.max(0, Math.round((correctTypedChars / 5) / timeElapsedMin))
+    : 0;
+
+  // Track peak WPM
   React.useEffect(() => {
-    if (activeGame !== 'boss' || isBossDefeated || isBossTimeUp || !hasStartedTypingBoss) return;
+    if (liveNetWpm > peakWpm) setPeakWpm(liveNetWpm);
+  }, [liveNetWpm, peakWpm]);
+
+  // Turbo Countdown Timer
+  React.useEffect(() => {
+    if (activeGame !== 'turbo' || !hasStartedTypingTurbo || isTurboFinished) return;
 
     const timer = setInterval(() => {
-      setBossTimer(t => {
-        if (t <= 1) {
-          setIsBossTimeUp(true);
-          soundEngine.playError();
-          return 0;
-        }
-        return t - 1;
-      });
+      setTurboTimer(t => Math.max(0, t - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [activeGame, isBossDefeated, isBossTimeUp, hasStartedTypingBoss]);
+  }, [activeGame, hasStartedTypingTurbo, isTurboFinished]);
 
-  const handleBossInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  React.useEffect(() => {
+    if (activeGame === 'turbo' && hasStartedTypingTurbo && !isTurboFinished && turboTimer === 0) {
+      setIsTurboFinished(true);
+      soundEngine.playSuccessFanfare();
+      if (liveNetWpm >= 50 && onAwardBadge) onAwardBadge('speed_demon');
+    }
+  }, [activeGame, hasStartedTypingTurbo, isTurboFinished, turboTimer, liveNetWpm, onAwardBadge]);
+
+  const handleTurboInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setBossInput(val);
+    setTurboInput(val);
 
-    if (!hasStartedTypingBoss && val.length > 0) {
-      setHasStartedTypingBoss(true);
+    if (!hasStartedTypingTurbo && val.length > 0) {
+      setHasStartedTypingTurbo(true);
     }
 
-    const targetPhrase = currentBossPhase.targetPhrase;
     if (val.length === 0) return;
 
-    // Check last typed char
-    if (val[val.length - 1] === targetPhrase[val.length - 1]) {
+    const expectedChar = activeTurboSentence[val.length - 1];
+    const actualChar = val[val.length - 1];
+
+    setTotalTypedChars(c => c + 1);
+
+    if (expectedChar === actualChar) {
       soundEngine.playKeyPress();
+      setCorrectTypedChars(c => c + 1);
+      setNitroCombo(c => c + 1);
 
-      const baseDmg = 10 + (bossPhaseIdx * 5);
-      setBossHp(hp => {
-        const nextHp = Math.max(0, hp - baseDmg);
-        setBossDamageEffect(baseDmg);
-        setTimeout(() => setBossDamageEffect(null), 300);
-
-        if (nextHp <= 0) {
-          soundEngine.playSuccessFanfare();
-          if (bossPhaseIdx < BOSS_PHASES.length - 1) {
-            const nextIdx = bossPhaseIdx + 1;
-            setBossPhaseIdx(nextIdx);
-            setBossHp(BOSS_PHASES[nextIdx].maxHp);
-            setBossTimer(BOSS_PHASES[nextIdx].timeLimit);
-            setBossInput('');
-            setBossLogs(prev => [
-              `🔥 ENRAGE! ${BOSS_PHASES[nextIdx].title} Activated!`,
-              ...prev.slice(0, 3)
-            ]);
-          } else {
-            setIsBossDefeated(true);
-            if (onAwardBadge) onAwardBadge('boss_slayer');
-          }
-        }
-        return nextHp;
-      });
-
-      if (val.length >= targetPhrase.length && bossHp > 0) {
-        setBossInput('');
+      // Complete sentence -> loop seamlessly to next sentence
+      if (val.length >= activeTurboSentence.length) {
+        soundEngine.playKeyPress();
+        setSentenceIdx(i => i + 1);
+        setTurboInput('');
       }
     } else {
       soundEngine.playError();
+      setNitroCombo(0); // Reset nitro combo on mistake
     }
   };
 
-  const startBossGame = () => {
-    setActiveGame('boss');
-    setBossPhaseIdx(0);
-    setBossHp(BOSS_PHASES[0].maxHp);
-    setBossTimer(BOSS_PHASES[0].timeLimit);
-    setHasStartedTypingBoss(false);
-    setBossInput('');
-    setIsBossDefeated(false);
-    setIsBossTimeUp(false);
-    setBossLogs(['Battle Ready! Type target phrases rapidly to strike the Examiner!']);
+  const startTurboGame = () => {
+    setActiveGame('turbo');
+    setTurboTimer(45);
+    setHasStartedTypingTurbo(false);
+    setIsTurboFinished(false);
+    setSentenceIdx(0);
+    setTurboInput('');
+    setTotalTypedChars(0);
+    setCorrectTypedChars(0);
+    setNitroCombo(0);
+    setPeakWpm(0);
   };
 
+  // Speedometer Needle Rotation Angle (-90 deg to +90 deg)
+  const needleAngle = Math.min(90, Math.max(-90, -90 + (liveNetWpm / 80) * 180));
+
+  // WPM Grade Color
+  const getWpmColor = (wpm: number) => {
+    if (wpm >= 50) return 'text-purple-400 border-purple-500 shadow-purple-500/50';
+    if (wpm >= 40) return 'text-blue-400 border-blue-500 shadow-blue-500/50';
+    if (wpm >= 30) return 'text-emerald-400 border-emerald-500 shadow-emerald-500/50';
+    return 'text-amber-400 border-amber-500 shadow-amber-500/50';
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 text-white shadow-xl flex items-center justify-between">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-semibold mb-2">
-            <Gamepad2 className="w-3.5 h-3.5" /> Dynamic Time-Scaling CPCT Games
+    <div className="space-y-6">
+      {/* Top Banner / Game Mode Picker */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl text-slate-900 dark:text-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> CPCT Interactive Arcade
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black mt-2">Keyboard Speed & Accuracy Games</h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Polished gamified training modules designed to boost your finger rhythm, speed, and accuracy!
+            </p>
           </div>
-          <h2 className="text-2xl font-black tracking-tight">Gamified Speed & Accuracy Arena</h2>
-          <p className="text-xs text-purple-200/80 mt-1 max-w-lg">
-            Interactive mini-games featuring immediate word spawns, first-keystroke timer activation, and adaptive difficulty scaling!
-          </p>
+
+          {activeGame !== 'none' && (
+            <button
+              onClick={() => setActiveGame('none')}
+              className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all"
+            >
+              <RotateCcw className="w-4 h-4" /> Exit Game
+            </button>
+          )}
         </div>
+
+        {/* 3 Game Selector Cards */}
+        {activeGame === 'none' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Game 1: Falling Word Defender */}
+            <div
+              onClick={startMeteorGame}
+              className="group p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/40 border border-amber-500/30 hover:border-amber-400 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 relative overflow-hidden text-white"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 group-hover:scale-110 transition-transform">
+                  <Flame className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                  Infinite Survival
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-amber-300 mb-1">1. Falling Word Defender</h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                Type words continuously before they hit the ground. Words spawn infinitely until all 3 lives are lost!
+              </p>
+              <div className="flex items-center justify-between pt-3 border-t border-amber-500/20 text-xs font-bold text-amber-400">
+                <span>Play Defender</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {/* Game 2: Accuracy Streak Sprint */}
+            <div
+              onClick={startStreakGame}
+              className="group p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 relative overflow-hidden text-white"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 group-hover:scale-110 transition-transform">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  12 Difficulty Stages
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-emerald-300 mb-1">2. Accuracy Streak Sprint</h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                Type with 100% precision through 12 unique levels. Any single mistake resets your streak & restarts at Level 1!
+              </p>
+              <div className="flex items-center justify-between pt-3 border-t border-emerald-500/20 text-xs font-bold text-emerald-400">
+                <span>Start Precision Run</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {/* Game 3: CPCT Turbo WPM Speedometer Surge */}
+            <div
+              onClick={startTurboGame}
+              className="group p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-purple-950/40 border border-purple-500/30 hover:border-purple-400 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 relative overflow-hidden text-white"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/40 group-hover:scale-110 transition-transform">
+                  <Gauge className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/30">
+                  45s Speed Blitz
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-purple-300 mb-1">3. CPCT Turbo Speedometer Surge</h3>
+              <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                High-octane speed challenge with a live animated WPM Speedometer needle. Push your engine into Grade A (50+ WPM)!
+              </p>
+              <div className="flex items-center justify-between pt-3 border-t border-purple-500/20 text-xs font-bold text-purple-400">
+                <span>Launch Speed Engine</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Game Mode Selector Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Game 1 Selector */}
-        <div className={`p-5 rounded-2xl border text-left transition-all ${
-          activeGame === 'meteor'
-            ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/30'
-            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-        }`}>
-          <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-500 w-fit mb-3">
-            <Flame className="w-6 h-6" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">Falling Word Defender</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
-            Words drop immediately upon start! Timer begins on your first keystroke, scaling speed up every 15 seconds.
-          </p>
-          <button
-            onClick={startMeteorGame}
-            className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center justify-center gap-1.5"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" /> Play Word Defender
-          </button>
-        </div>
-
-        {/* Game 2 Selector */}
-        <div className={`p-5 rounded-2xl border text-left transition-all ${
-          activeGame === 'streak'
-            ? 'bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/30'
-            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-        }`}>
-          <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-500 w-fit mb-3">
-            <Zap className="w-6 h-6" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">Accuracy Streak Sprint</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
-            Build 100% flawless typing streaks. Starts timer on first keystroke & advances through 4 CPCT stages.
-          </p>
-          <button
-            onClick={startStreakGame}
-            className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center justify-center gap-1.5"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" /> Play Streak Challenge
-          </button>
-        </div>
-
-        {/* Game 3 Selector */}
-        <div className={`p-5 rounded-2xl border text-left transition-all ${
-          activeGame === 'boss'
-            ? 'bg-purple-500/10 border-purple-500 ring-2 ring-purple-500/30'
-            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-        }`}>
-          <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 w-fit mb-3">
-            <Trophy className="w-6 h-6" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">CPCT Examiner Boss Rush</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
-            60s timer starts when you strike! Defeat 3 evolving phases of CPCT Senior Examiner boss shields.
-          </p>
-          <button
-            onClick={startBossGame}
-            className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center justify-center gap-1.5"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" /> Fight Examiner Boss
-          </button>
-        </div>
-      </div>
-
 
       {/* ========================================================= */}
       {/* GAME 1 CANVAS: FALLING WORD DEFENDER */}
       {/* ========================================================= */}
       {activeGame === 'meteor' && (
-        <div className="bg-slate-950 border border-amber-500/40 rounded-2xl p-6 text-white relative h-[440px] flex flex-col justify-between shadow-2xl overflow-hidden">
-          {/* HUD Header */}
-          <div className="flex justify-between items-center pb-3 border-b border-slate-800 relative z-10">
-            <div className="flex items-center gap-4 text-xs font-mono">
-              <span className="flex items-center gap-1">
-                Score: <strong className="text-amber-400 text-lg font-black">{score}</strong>
+        <div className="bg-slate-950 border border-amber-500/40 rounded-2xl p-4 sm:p-6 text-white shadow-2xl space-y-4 relative overflow-hidden min-h-[460px] flex flex-col">
+          {/* Header HUD */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold text-xs">
+                Level {meteorLevel}
               </span>
-              <span className="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/30 text-amber-300 font-bold">
-                Combo: x{combo}
-              </span>
-              <span className="flex items-center gap-1">
-                Level: <strong className="text-purple-300 font-extrabold">{meteorLevel}</strong>
-                <span className="text-[10px] text-slate-400">
-                  ({meteorLevel === 1 ? 'Easy' : meteorLevel === 2 ? 'Medium' : meteorLevel === 3 ? 'Hard' : 'OVERDRIVE!'})
-                </span>
-              </span>
-              <span className="text-slate-400">
-                Time: <strong className="text-white">{Math.floor(meteorGameTime)}s</strong>
-              </span>
+              <div>
+                <h3 className="text-lg font-black text-amber-300">Falling Word Defender</h3>
+                <span className="text-[10px] text-slate-400">Infinite survival mode • Destroy words before impact</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="text-xs font-mono flex items-center gap-1">
-                Lives: <strong className="text-rose-500 text-base">{'❤️'.repeat(lives)}</strong>
-              </div>
-              <button
-                onClick={startMeteorGame}
-                className="text-xs text-amber-400 flex items-center gap-1 hover:underline font-bold"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Restart
-              </button>
+            <div className="flex items-center gap-3 sm:gap-5 text-xs font-mono">
+              <span>Score: <strong className="text-amber-400 text-base font-black">{score}</strong></span>
+              <span>Words: <strong className="text-emerald-400 font-bold">{wordsDestroyed}</strong></span>
+              <span>Combo: <strong className="text-purple-300 font-bold">x{combo}</strong></span>
+              <span>Time: <strong className="text-white font-bold">{Math.floor(meteorGameTime)}s</strong></span>
+              <span className="text-rose-400 font-bold">Lives: {'❤️'.repeat(lives)}</span>
             </div>
           </div>
 
           {/* First Keystroke Banner */}
           {!hasStartedTypingMeteor && !isGameOver && (
-            <div className="bg-amber-500/20 border border-amber-400/50 rounded-xl p-2.5 text-center text-amber-300 text-xs font-bold animate-pulse my-1 z-20 flex items-center justify-center gap-2">
+            <div className="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center text-amber-300 text-xs font-bold animate-pulse flex items-center justify-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" />
-              ⏱ Words are ready! Type any word in the box below to start timer & falling action!
+              ⏱ Start typing any word in the box below to trigger timer & falling words!
             </div>
           )}
 
-          {/* Level Progress Indicator Bar */}
-          <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden relative z-10 my-1 border border-slate-800">
-            <div
-              className="bg-gradient-to-r from-amber-500 via-orange-500 to-purple-500 h-full transition-all duration-300"
-              style={{ width: `${Math.min(100, (meteorGameTime / 60) * 100)}%` }}
-            />
-          </div>
-
-          {/* Interactive Playing Field */}
-          <div className="relative flex-1 w-full overflow-hidden my-2 border border-slate-900/80 rounded-xl bg-slate-900/30">
+          {/* Interactive Field */}
+          <div className="relative flex-1 w-full min-h-[260px] overflow-hidden rounded-xl bg-slate-900/60 border border-slate-800 p-2">
             {words.map(w => {
               const isPrefixMatch = typedInput.length > 0 && w.text.startsWith(typedInput);
               return (
                 <div
                   key={w.id}
                   style={{ top: `${w.top}%`, left: `${w.left}%` }}
-                  className={`absolute px-3 py-1.5 rounded-lg font-mono text-sm font-black shadow-lg transition-transform ${
+                  className={`absolute px-3 py-1.5 rounded-lg font-mono text-xs sm:text-sm font-black shadow-lg transition-transform ${
                     isPrefixMatch
                       ? 'bg-emerald-600/40 border-2 border-emerald-400 text-emerald-200 scale-105 ring-2 ring-emerald-400/40 z-10'
                       : 'bg-amber-500/20 border border-amber-400/80 text-amber-300'
@@ -577,7 +604,7 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
               <div
                 key={exp.id}
                 style={{ top: `${exp.top}%`, left: `${exp.left}%` }}
-                className="absolute font-mono font-black text-emerald-400 animate-bounce text-sm bg-emerald-950 border border-emerald-400 px-2 py-0.5 rounded-full shadow-lg z-20 pointer-events-none"
+                className="absolute font-mono font-black text-emerald-400 animate-bounce text-xs bg-emerald-950 border border-emerald-400 px-2 py-0.5 rounded-full shadow-lg z-20 pointer-events-none"
               >
                 💥 +{10 * combo} {exp.text}!
               </div>
@@ -585,35 +612,35 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
             {/* Game Over Screen */}
             {isGameOver && (
-              <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center space-y-3 z-30 p-6 text-center">
+              <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center space-y-3 z-30 p-6 text-center animate-in zoom-in-95">
                 <ShieldAlert className="w-12 h-12 text-rose-500 animate-pulse" />
-                <h3 className="text-2xl font-black text-rose-500">Defender Compromised!</h3>
+                <h3 className="text-2xl font-black text-rose-500">Defenses Compromised!</h3>
                 <p className="text-xs text-slate-300 max-w-xs">
-                  Survived for <strong className="text-white">{Math.floor(meteorGameTime)}s</strong> reaching Level {meteorLevel}.
+                  All 3 lives were lost! You survived for <strong className="text-white">{Math.floor(meteorGameTime)}s</strong> and destroyed <strong className="text-emerald-400">{wordsDestroyed} words</strong>.
                 </p>
-                <div className="text-lg font-black text-amber-400 font-mono">
+                <div className="text-xl font-black text-amber-400 font-mono">
                   Final Score: {score} PTS
                 </div>
                 <button
                   onClick={startMeteorGame}
                   className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs shadow-lg transition-transform active:scale-95"
                 >
-                  Try Again
+                  Play Again
                 </button>
               </div>
             )}
           </div>
 
           {/* Typing Input Box */}
-          <div className="relative z-10 pt-2 border-t border-slate-800">
+          <div className="pt-2 border-t border-slate-800">
             <input
               type="text"
               value={typedInput}
               onChange={handleMeteorInputChange}
               disabled={isGameOver}
               autoFocus
-              placeholder="Type falling word to destroy it (e.g. cpct, test, hand)..."
-              className="w-full p-3.5 rounded-xl bg-slate-900 border border-amber-500/50 text-amber-300 font-mono text-sm focus:outline-none ring-2 ring-amber-500/30"
+              placeholder="Type falling word to destroy it (e.g. cpct, test, speed)..."
+              className="w-full p-3 rounded-xl bg-slate-900 border border-amber-500/50 text-amber-300 font-mono text-sm focus:outline-none ring-2 ring-amber-500/30"
             />
           </div>
         </div>
@@ -621,83 +648,86 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
 
       {/* ========================================================= */}
-      {/* GAME 2 CANVAS: ACCURACY STREAK SPRINT */}
+      {/* GAME 2 CANVAS: ACCURACY STREAK SPRINT (12 STAGES, RESET TO LEVEL 1 ON MISTAKE) */}
       {/* ========================================================= */}
       {activeGame === 'streak' && (
         <div className={`bg-white dark:bg-slate-900 border rounded-2xl p-6 shadow-xl space-y-4 text-slate-900 dark:text-white transition-colors duration-200 ${
           streakError ? 'border-rose-500 ring-4 ring-rose-500/20' : 'border-emerald-500/40'
         }`}>
           {/* Header HUD */}
-          <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 gap-2">
             <div>
               <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-600 dark:text-emerald-400 font-black text-xs inline-block mb-1">
                 {currentStreakLevel.name}
               </span>
               <h3 className="text-lg font-black flex items-center gap-2">
-                <Zap className="w-5 h-5 text-emerald-500" /> 100% Precision Challenge
+                <Zap className="w-5 h-5 text-emerald-500" /> Accuracy Streak Sprint
               </h3>
             </div>
 
             <div className="flex items-center gap-4 text-xs font-mono">
-              <span className="flex items-center gap-1">
-                Streak: <strong className="text-emerald-500 text-lg font-black">{streakCount}</strong>
-              </span>
-              <span className="flex items-center gap-1">
-                Best: <strong className="text-blue-500 text-lg font-black">{bestStreak}</strong>
-              </span>
-              <span className="text-slate-400">
-                Time: <strong className="text-slate-800 dark:text-slate-200">{streakTimer}s</strong>
-              </span>
+              <span>Streak: <strong className="text-emerald-500 text-lg font-black">{streakCount}</strong></span>
+              <span>Best: <strong className="text-blue-500 text-lg font-black">{bestStreak}</strong></span>
+              <span>Time: <strong className="text-slate-800 dark:text-slate-200">{streakTimer}s</strong></span>
             </div>
           </div>
 
-          {/* First Keystroke Notice */}
-          {!hasStartedTypingStreak && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-2 animate-pulse">
-              <Clock className="w-4 h-4" /> ⏱ Streak timer will start on your first keystroke!
+          {/* Error Reset Warning Banner */}
+          {streakError && (
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500 text-rose-600 dark:text-rose-400 text-xs font-extrabold text-center animate-bounce">
+              ⚠️ WRONG KEY PRESSED! STREAK RESET TO 0 & DIFFICULTY RESTARTED AT LEVEL 1!
             </div>
           )}
 
-          {/* Level Progress Bar */}
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-            <span>Difficulty Stage {currentStreakLevel.level} of 4</span>
-            <div className="flex-1 bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+          {/* First Keystroke Notice */}
+          {!hasStartedTypingStreak && !streakError && (
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-2 animate-pulse">
+              <Clock className="w-4 h-4" /> ⏱ Timer starts on your first keypress! One wrong key resets back to Level 1.
+            </div>
+          )}
+
+          {/* Level Progress Indicator */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs font-bold text-slate-500">
+              <span>Difficulty Stage {streakStageIdx + 1} of 12</span>
+              <span>{Math.round(((streakStageIdx + 1) / 12) * 100)}% Complete</span>
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
               <div
                 className="bg-emerald-500 h-full transition-all duration-300"
-                style={{ width: `${((streakStageIdx + 1) / 4) * 100}%` }}
+                style={{ width: `${((streakStageIdx + 1) / 12) * 100}%` }}
               />
             </div>
           </div>
 
-          {/* Target Text Stream */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-base leading-relaxed tracking-wide select-none">
-            {currentStreakLevel.text.split('').map((char, idx) => {
-              let charStyle = 'text-slate-400 opacity-60';
-              if (idx < streakInput.length) {
-                if (streakInput[idx] === char) {
-                  charStyle = 'text-emerald-500 font-bold bg-emerald-500/10 px-0.5 rounded';
-                } else {
-                  charStyle = 'text-rose-500 font-bold bg-rose-500/20 px-0.5 rounded';
+          {/* Target Text Stream & Input */}
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-base leading-relaxed tracking-wide select-none">
+              {currentStreakLevel.text.split('').map((char, idx) => {
+                let charStyle = 'text-slate-400 opacity-60';
+                if (idx < streakInput.length) {
+                  if (streakInput[idx] === char) {
+                    charStyle = 'text-emerald-500 font-bold bg-emerald-500/10 px-0.5 rounded';
+                  } else {
+                    charStyle = 'text-rose-500 font-bold bg-rose-500/20 px-0.5 rounded';
+                  }
+                } else if (idx === streakInput.length) {
+                  charStyle = 'text-slate-900 dark:text-white font-black bg-emerald-500/30 underline ring-1 ring-emerald-400 px-0.5 rounded animate-pulse';
                 }
-              } else if (idx === streakInput.length) {
-                charStyle = 'text-slate-900 dark:text-white font-black bg-emerald-500/30 underline ring-1 ring-emerald-400 px-0.5 rounded animate-pulse';
-              }
-              return (
-                <span key={idx} className={charStyle}>
-                  {char}
-                </span>
-              );
-            })}
-          </div>
+                return (
+                  <span key={idx} className={charStyle}>
+                    {char}
+                  </span>
+                );
+              })}
+            </div>
 
-          {/* Typing Input */}
-          <div>
             <input
               type="text"
               value={streakInput}
               onChange={handleStreakInputChange}
               autoFocus
-              placeholder="Type perfectly without making a single typo..."
+              placeholder="Type character by character with 100% precision..."
               className="w-full p-3.5 rounded-xl border border-emerald-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-mono text-base focus:outline-none ring-2 ring-emerald-500/30"
             />
           </div>
@@ -706,131 +736,153 @@ export const GamifiedChallenges: React.FC<GamifiedChallengesProps> = ({ onAwardB
 
 
       {/* ========================================================= */}
-      {/* GAME 3 CANVAS: CPCT EXAMINER BOSS RUSH */}
+      {/* GAME 3 CANVAS: CPCT TURBO SPEEDOMETER SURGE */}
       {/* ========================================================= */}
-      {activeGame === 'boss' && (
-        <div className="bg-slate-950 border border-purple-500/40 rounded-2xl p-6 text-white shadow-2xl space-y-5 relative overflow-hidden">
-          {/* Boss HUD Header */}
-          <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+      {activeGame === 'turbo' && (
+        <div className="bg-slate-950 border border-purple-500/40 rounded-2xl p-6 text-white shadow-2xl space-y-6 relative overflow-hidden">
+          {/* Header HUD */}
+          <div className="flex flex-wrap items-center justify-between pb-3 border-b border-slate-800 gap-2">
             <div>
               <span className="px-2.5 py-0.5 rounded bg-purple-950 border border-purple-500/60 text-purple-300 font-black text-xs">
-                {currentBossPhase.title}
+                45-Sec Speed Engine Surge
               </span>
               <h3 className="text-xl font-black text-white mt-1 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-400" /> {currentBossPhase.bossName}
+                <Gauge className="w-5 h-5 text-purple-400" /> CPCT Turbo Speedometer Surge
               </h3>
             </div>
 
             <div className="flex items-center gap-4 text-xs font-mono">
               <span className="flex items-center gap-1 text-amber-400 font-black text-base">
-                <Clock className="w-4 h-4 text-amber-400" /> {bossTimer}s Left
+                <Clock className="w-4 h-4" /> {turboTimer}s Left
               </span>
               <button
-                onClick={startBossGame}
+                onClick={startTurboGame}
                 className="text-xs text-purple-300 flex items-center gap-1 hover:underline font-bold"
               >
-                <RotateCcw className="w-3.5 h-3.5" /> Restart Battle
+                <RotateCcw className="w-3.5 h-3.5" /> Restart Engine
               </button>
             </div>
           </div>
 
-          {/* First Keystroke Notice */}
-          {!hasStartedTypingBoss && (
+          {/* First Keystroke Banner */}
+          {!hasStartedTypingTurbo && !isTurboFinished && (
             <div className="p-3 rounded-xl bg-purple-500/20 border border-purple-400/50 text-purple-300 text-xs font-bold flex items-center justify-center gap-2 animate-pulse">
-              <Clock className="w-4 h-4 text-purple-300" /> ⏱ 60s countdown timer starts when you strike your first character!
+              <Clock className="w-4 h-4 text-purple-300" /> ⏱ Engine on standby! Start typing the text below to ignite the WPM Speedometer!
             </div>
           )}
 
-          {/* Boss HP Health Bar */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-mono font-bold">
-              <span className="text-purple-300">Examiner Shield Integrity</span>
-              <span className="text-emerald-400">{bossHp} / {currentBossPhase.maxHp} HP</span>
-            </div>
-            <div className="w-full bg-slate-900 h-4 rounded-full overflow-hidden border border-slate-800 p-0.5 relative">
-              <div
-                className="bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 h-full rounded-full transition-all duration-300"
-                style={{ width: `${(bossHp / currentBossPhase.maxHp) * 100}%` }}
-              />
-              {bossDamageEffect && (
-                <span className="absolute right-4 top-0.5 text-[10px] font-mono font-black text-amber-300 animate-ping">
-                  -{bossDamageEffect} CRITICAL STRIKE!
+          {/* Speedometer Gauge & Live HUD Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+            {/* Speedometer Dial Container */}
+            <div className="flex flex-col items-center justify-center relative">
+              <div className="w-40 h-24 border-t-8 border-l-8 border-r-8 border-slate-800 rounded-t-full relative flex items-end justify-center overflow-hidden">
+                {/* Dial Color Tiers Arc */}
+                <div className="absolute inset-0 border-t-8 border-emerald-500 opacity-80" style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0)' }} />
+                
+                {/* Speedometer Needle */}
+                <div
+                  className="w-1 h-16 bg-gradient-to-t from-amber-400 to-rose-500 origin-bottom transition-transform duration-200 rounded-full shadow-lg"
+                  style={{ transform: `rotate(${needleAngle}deg)` }}
+                />
+                <div className="w-4 h-4 bg-amber-400 rounded-full border-2 border-slate-950 absolute bottom-0 z-10" />
+              </div>
+
+              <div className="text-center mt-2">
+                <span className={`text-3xl font-black font-mono ${getWpmColor(liveNetWpm)}`}>
+                  {liveNetWpm} <span className="text-xs text-slate-400">WPM</span>
                 </span>
-              )}
+                <span className="block text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                  Live Engine Speed
+                </span>
+              </div>
+            </div>
+
+            {/* Performance Metrics */}
+            <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-slate-400 block text-[10px]">Peak Speed Hit</span>
+                <span className="text-lg font-black text-amber-400">{peakWpm} WPM</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-slate-400 block text-[10px]">Nitro Combo</span>
+                <span className="text-lg font-black text-emerald-400">x{nitroCombo}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-slate-400 block text-[10px]">Accuracy</span>
+                <span className="text-lg font-black text-purple-300">
+                  {totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100}%
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-slate-400 block text-[10px]">CPCT Target</span>
+                <span className="text-lg font-black text-blue-400">30+ Grade C</span>
+              </div>
+            </div>
+
+            {/* Nitro Boost Engine Meter */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold font-mono">
+                <span className="text-purple-300">Nitro Engine Boost</span>
+                <span className="text-amber-400">{nitroCombo >= 40 ? 'MAX NITRO 3.0x!' : nitroCombo >= 20 ? 'NITRO 2.0x' : '1.0x Standard'}</span>
+              </div>
+              <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                <div
+                  className="bg-gradient-to-r from-purple-500 via-blue-500 to-amber-400 h-full transition-all duration-200"
+                  style={{ width: `${Math.min(100, (nitroCombo / 40) * 100)}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Target Phrase Box */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-purple-500/50 font-mono text-base text-purple-200 leading-relaxed select-none">
-            {currentBossPhase.targetPhrase.split('').map((char, idx) => {
-              let style = 'text-slate-500';
-              if (idx < bossInput.length) {
-                if (bossInput[idx] === char) {
-                  style = 'text-emerald-400 font-bold bg-emerald-950 px-0.5 rounded';
-                } else {
-                  style = 'text-rose-400 font-bold bg-rose-950 px-0.5 rounded';
+          {/* Typing Target Stream & Input */}
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl bg-slate-900 border border-purple-500/40 font-mono text-base text-purple-200 leading-relaxed select-none">
+              {activeTurboSentence.split('').map((char, idx) => {
+                let style = 'text-slate-500';
+                if (idx < turboInput.length) {
+                  if (turboInput[idx] === char) {
+                    style = 'text-emerald-400 font-bold bg-emerald-950 px-0.5 rounded';
+                  } else {
+                    style = 'text-rose-400 font-bold bg-rose-950 px-0.5 rounded';
+                  }
+                } else if (idx === turboInput.length) {
+                  style = 'text-white font-black underline bg-purple-600 px-0.5 rounded animate-pulse';
                 }
-              } else if (idx === bossInput.length) {
-                style = 'text-white font-black underline bg-purple-600 px-0.5 rounded animate-pulse';
-              }
-              return (
-                <span key={idx} className={style}>
-                  {char}
-                </span>
-              );
-            })}
-          </div>
+                return (
+                  <span key={idx} className={style}>
+                    {char}
+                  </span>
+                );
+              })}
+            </div>
 
-          {/* Input Field */}
-          <div>
             <input
               type="text"
-              value={bossInput}
-              onChange={handleBossInputChange}
-              disabled={isBossDefeated || isBossTimeUp}
+              value={turboInput}
+              onChange={handleTurboInputChange}
+              disabled={isTurboFinished}
               autoFocus
-              placeholder="Type target phrase rapidly to strike the Examiner..."
+              placeholder="Type continuously to rev up your WPM Speedometer..."
               className="w-full p-3.5 rounded-xl bg-slate-900 border border-purple-500/60 text-purple-200 font-mono text-base focus:outline-none ring-2 ring-purple-500/30"
             />
           </div>
 
-          {/* Battle Logs */}
-          <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400 space-y-1">
-            {bossLogs.map((log, idx) => (
-              <p key={idx}>{log}</p>
-            ))}
-          </div>
-
-          {/* Victory Modal */}
-          {isBossDefeated && (
-            <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center space-y-3 z-30 p-6 text-center">
-              <Sparkles className="w-12 h-12 text-amber-400 animate-spin" />
-              <h3 className="text-2xl font-black text-amber-400">EXAMINER BOSS DEFEATED!</h3>
+          {/* Finish Summary Modal */}
+          {isTurboFinished && (
+            <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center space-y-3 z-30 p-6 text-center animate-in zoom-in-95">
+              <Trophy className="w-12 h-12 text-amber-400 animate-bounce" />
+              <h3 className="text-2xl font-black text-amber-400">SPEED BLITZ COMPLETE!</h3>
               <p className="text-xs text-purple-200 max-w-xs">
-                You passed all 3 phases of the CPCT Examiner Boss Rush with maximum precision!
+                Final Net Speed: <strong className="text-white text-base">{liveNetWpm} WPM</strong> • Peak Speed: <strong className="text-amber-400 text-base">{peakWpm} WPM</strong>
               </p>
+              <div className="px-4 py-2 rounded-xl bg-purple-950 border border-purple-500 text-purple-300 font-mono text-xs font-bold">
+                {liveNetWpm >= 50 ? '🏅 Grade A Master Qualification!' : liveNetWpm >= 40 ? '🥈 Grade B Distinction Qualification!' : liveNetWpm >= 30 ? '🥉 Grade C Pass Qualification!' : '⚡ Practice to reach 30+ WPM!'}
+              </div>
               <button
-                onClick={startBossGame}
+                onClick={startTurboGame}
                 className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs shadow-lg transition-transform active:scale-95"
               >
-                Fight Again
-              </button>
-            </div>
-          )}
-
-          {/* Defeat / Time Up Modal */}
-          {isBossTimeUp && !isBossDefeated && (
-            <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center space-y-3 z-30 p-6 text-center">
-              <ShieldAlert className="w-12 h-12 text-rose-500 animate-bounce" />
-              <h3 className="text-2xl font-black text-rose-500">TIME EXPIRED!</h3>
-              <p className="text-xs text-slate-300 max-w-xs">
-                The CPCT Examiner shield remained at {bossHp} HP. Increase typing speed and retry!
-              </p>
-              <button
-                onClick={startBossGame}
-                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs shadow-lg transition-transform active:scale-95"
-              >
-                Try Again
+                Race Again
               </button>
             </div>
           )}

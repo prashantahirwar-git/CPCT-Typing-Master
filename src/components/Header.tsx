@@ -4,12 +4,12 @@ import { ThemeSelector } from './ThemeSelector';
 import { soundEngine } from '../lib/audio';
 import {
   Keyboard, Award, TrendingUp, Volume2, VolumeX, HelpCircle, Gamepad2, Users, Target, UserCheck, Flame,
-  Maximize2, Minimize2, HardDrive
+  Maximize2, Minimize2, HardDrive, BookOpen
 } from 'lucide-react';
 
 interface HeaderProps {
-  activeTab: 'practice' | 'exam' | 'analytics' | 'warmup' | 'games' | 'leaderboard';
-  onTabChange: (tab: 'practice' | 'exam' | 'analytics' | 'warmup' | 'games' | 'leaderboard') => void;
+  activeTab: 'practice' | 'exam' | 'quiz' | 'analytics' | 'warmup' | 'games' | 'leaderboard';
+  onTabChange: (tab: 'practice' | 'exam' | 'quiz' | 'analytics' | 'warmup' | 'games' | 'leaderboard') => void;
   currentTheme: ThemeMode;
   onThemeChange: (theme: ThemeMode) => void;
   customColors: CustomThemeColors;
@@ -71,6 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'practice', label: 'Practice', icon: <Keyboard className="w-4 h-4" /> },
     { id: 'exam', label: 'Simulated Exam', icon: <Award className="w-4 h-4" /> },
+    { id: 'quiz', label: 'MCQ Quiz', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" /> },
     { id: 'warmup', label: 'Voice Warmup', icon: <Volume2 className="w-4 h-4" /> },
     { id: 'games', label: 'Games', icon: <Gamepad2 className="w-4 h-4" /> },
@@ -171,31 +172,31 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className={`sticky top-0 z-40 border-b transition-colors duration-200 ${style.headerBg}`}>
-      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 sm:py-3 flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
         {/* Logo & App Brand */}
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-xl border ${style.logoBg}`}>
-            <Keyboard className="w-6 h-6" />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className={`p-1.5 sm:p-2.5 rounded-xl border ${style.logoBg}`}>
+            <Keyboard className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className={`text-xl sm:text-2xl font-black tracking-wide ${style.titleText}`}>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h1 className={`text-base sm:text-2xl font-black tracking-wide ${style.titleText}`}>
                 CPCT Typing Master
               </h1>
-              <span className={`px-2.5 py-0.5 rounded-md border font-extrabold text-[10px] tracking-wide shadow-sm ${style.tagBg}`}>
+              <span className={`px-2 py-0.5 rounded-md border font-extrabold text-[9px] sm:text-[10px] tracking-wide shadow-sm hidden sm:inline-block ${style.tagBg}`}>
                 20-50 Days Prep
               </span>
             </div>
 
             {/* Profile Name, Streak Pill & Local Storage Badge */}
-            <div className={`flex items-center gap-2 text-xs ${style.subText}`}>
+            <div className={`flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs ${style.subText}`}>
               {isEditingName ? (
                 <form onSubmit={handleSaveName} className="flex items-center gap-1">
                   <input
                     type="text"
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
-                    className="px-2 py-0.5 rounded border text-xs bg-slate-900 text-white focus:outline-none"
+                    className="px-1.5 py-0.5 rounded border text-xs bg-slate-900 text-white focus:outline-none"
                     autoFocus
                   />
                   <button type="submit" className="text-emerald-400 text-[10px] font-bold hover:underline">Save</button>
@@ -205,16 +206,16 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => setIsEditingName(true)}
                   className="hover:underline flex items-center gap-1 font-bold"
                 >
-                  <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
                   {profile.name}
                 </button>
               )}
               <span>•</span>
               <span className="text-emerald-400 font-bold flex items-center gap-0.5">
-                <Flame className="w-3.5 h-3.5 fill-current text-amber-400" /> {profile.streakDays}d Streak
+                <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current text-amber-400" /> {profile.streakDays}d Streak
               </span>
-              <span>•</span>
-              <span title="All progress, custom settings and test history saved automatically in your browser - No login required!" className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/80">
+              <span className="hidden sm:inline">•</span>
+              <span title="All progress, custom settings and test history saved automatically in your browser - No login required!" className="hidden sm:inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-slate-400 bg-slate-800/80 px-1.5 sm:px-2 py-0.5 rounded border border-slate-700/80">
                 <HardDrive className="w-3 h-3 text-emerald-400" /> Saved Locally
               </span>
             </div>
@@ -222,21 +223,21 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <nav className={`flex items-center gap-1 p-1.5 rounded-xl border overflow-x-auto max-w-full shadow-inner ${style.navBg}`}>
+        <nav className={`flex items-center gap-1 p-1 rounded-xl border overflow-x-auto max-w-full shadow-inner ${style.navBg}`}>
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-black whitespace-nowrap transition-all ${
                   isActive ? style.navActive : style.navInactive
                 }`}
               >
                 {item.id === 'warmup' ? (
-                  <Volume2 className={`w-4 h-4 ${isActive ? 'text-current' : 'animate-pulse'}`} />
+                  <Volume2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-current' : 'animate-pulse'}`} />
                 ) : (
-                  item.icon
+                  React.cloneElement(item.icon as React.ReactElement, { className: 'w-3.5 h-3.5 sm:w-4 sm:h-4' })
                 )}
                 <span>{item.label}</span>
               </button>
@@ -245,22 +246,22 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Right Tools & Theme Selector */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Fullscreen Toggle Button */}
           <button
             onClick={toggleAppFullscreen}
             title={isFullscreen ? 'Exit Fullscreen Mode' : 'Enter Fullscreen Mode'}
-            className={`px-3 py-2 rounded-xl border transition-all text-xs font-black flex items-center gap-1.5 shadow-md active:scale-95 ${style.toolBtn}`}
+            className={`px-2 sm:px-3 py-1 sm:py-2 rounded-xl border transition-all text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 shadow-md active:scale-95 ${style.toolBtn}`}
           >
             {isFullscreen ? (
               <>
-                <Minimize2 className={`w-4 h-4 ${style.toolIcon}`} />
-                <span className="hidden sm:inline font-black">Exit Fullscreen</span>
+                <Minimize2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${style.toolIcon}`} />
+                <span className="hidden md:inline font-black">Exit Fullscreen</span>
               </>
             ) : (
               <>
-                <Maximize2 className={`w-4 h-4 ${style.toolIcon}`} />
-                <span className="hidden sm:inline font-black">Fullscreen</span>
+                <Maximize2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${style.toolIcon}`} />
+                <span className="hidden md:inline font-black">Fullscreen</span>
               </>
             )}
           </button>
@@ -269,26 +270,26 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenTutorial}
             title="Interactive Tutorial Mode"
-            className={`px-3.5 py-2 rounded-xl border transition-all text-xs font-black flex items-center gap-2 shadow-md active:scale-95 ${style.toolBtn}`}
+            className={`px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl border transition-all text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-2 shadow-md active:scale-95 ${style.toolBtn}`}
           >
-            <HelpCircle className={`w-4 h-4 ${style.toolIcon}`} />
-            <span className="font-black">Tutorial</span>
+            <HelpCircle className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${style.toolIcon}`} />
+            <span className="hidden sm:inline font-black">Tutorial</span>
           </button>
 
           {/* Voice / Audio Toggle Button */}
           <button
             onClick={toggleSound}
             title={isMuted ? 'Unmute Audio & Voice Coach' : 'Mute Audio & Voice Coach'}
-            className={`px-3.5 py-2 rounded-xl border text-xs font-black flex items-center gap-2 transition-all active:scale-95 shadow-md ${
+            className={`px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl border text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-2 transition-all active:scale-95 shadow-md ${
               isMuted ? style.voiceMuted : style.toolBtn
             }`}
           >
             {isMuted ? (
-              <VolumeX className="w-4 h-4 text-rose-400" />
+              <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400" />
             ) : (
-              <Volume2 className={`w-4 h-4 animate-pulse ${style.toolIcon}`} />
+              <Volume2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse ${style.toolIcon}`} />
             )}
-            <span className="hidden sm:inline font-black">{isMuted ? 'Voice OFF' : 'Voice ON'}</span>
+            <span className="hidden lg:inline font-black">{isMuted ? 'Voice OFF' : 'Voice ON'}</span>
           </button>
 
           {/* Theme Selector */}

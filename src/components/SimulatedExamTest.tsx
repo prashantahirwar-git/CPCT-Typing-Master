@@ -4,6 +4,7 @@ import { TestResult, BackspaceMode } from '../types';
 import { soundEngine } from '../lib/audio';
 import { saveTestResult } from '../lib/storage';
 import { VirtualKeyboard } from './VirtualKeyboard';
+import { convertEnglishToRemingtonHindi, getEnglishKeyHintForHindi } from '../lib/hindiRemington';
 import {
   Award, Clock, ShieldAlert, Play, AlertCircle, FileText, CheckCircle2, AlignLeft,
   Maximize2, Minimize2, Keyboard as KeyboardIcon, Zap
@@ -42,9 +43,9 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
 
   // Toggle Fullscreen Mode
   const toggleFullscreen = () => {
-    if (!isFullscreen) {
-      if (containerRef.current?.requestFullscreen) {
-        containerRef.current.requestFullscreen().catch(() => {});
+    if (!document.fullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
       }
       setIsFullscreen(true);
     } else {
@@ -109,6 +110,11 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
     setHasStartedTyping(false);
     soundEngine.playSuccessFanfare();
 
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    setIsFullscreen(false);
+
     const timeSpent = (examDurationMinutes * 60) - timeLeftSeconds;
     const timeSpentMin = Math.max(0.1, timeSpent / 60);
 
@@ -163,18 +169,18 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
   React.useEffect(() => {
     if (isExamStarted && hasStartedTyping) {
       timerRef.current = setInterval(() => {
-        setTimeLeftSeconds(prev => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            finishExam();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeftSeconds(prev => Math.max(0, prev - 1));
       }, 1000);
     }
     return () => clearInterval(timerRef.current);
-  }, [isExamStarted, hasStartedTyping, finishExam]);
+  }, [isExamStarted, hasStartedTyping]);
+
+  // Finish exam when timer reaches 0
+  React.useEffect(() => {
+    if (isExamStarted && hasStartedTyping && timeLeftSeconds === 0) {
+      finishExam();
+    }
+  }, [timeLeftSeconds, isExamStarted, hasStartedTyping, finishExam]);
 
   // Handle Keystrokes
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -198,9 +204,19 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
       }
       soundEngine.playKeyPress();
       setBackspaceCount(prev => prev + 1);
+      setTypedText(val);
     } else {
-      const charTyped = val[val.length - 1];
-      const expectedChar = targetText[val.length - 1];
+      let newTypedText = val;
+
+      if (selectedLang === 'hindi') {
+        // Convert physical QWERTY keystrokes into Remington Gail Hindi
+        const englishTypedPart = val.slice(typedText.length);
+        const hindiConvertedPart = convertEnglishToRemingtonHindi(englishTypedPart);
+        newTypedText = typedText + hindiConvertedPart;
+      }
+
+      const charTyped = newTypedText[newTypedText.length - 1];
+      const expectedChar = targetText[newTypedText.length - 1];
 
       if (charTyped === expectedChar) {
         soundEngine.playKeyPress();
@@ -209,12 +225,12 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
         const lowerChar = expectedChar ? expectedChar.toLowerCase() : 'space';
         setKeyErrors(prev => ({ ...prev, [lowerChar]: (prev[lowerChar] || 0) + 1 }));
       }
-    }
 
-    setTypedText(val);
+      setTypedText(newTypedText);
 
-    if (val.length >= targetText.length) {
-      finishExam();
+      if (newTypedText.length >= targetText.length) {
+        finishExam();
+      }
     }
   };
 
@@ -443,72 +459,104 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
             </div>
           )}
 
-          {/* Passage Display with Auto-Scrolling */}
-          <div
-            ref={passageContainerRef}
-            onClick={() => inputRef.current?.focus()}
-            className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-sm sm:text-base leading-relaxed max-h-56 overflow-y-auto select-none tracking-wide relative scroll-smooth cursor-text"
-          >
-            {targetText.split('').map((char, index) => {
-              const isCurrent = index === typedText.length;
-              let stateClass = 'text-slate-400 dark:text-slate-500';
-              if (index < typedText.length) {
-                if (typedText[index] === char) {
-                  stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
-                } else {
-                  stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
-                }
-              } else if (isCurrent) {
-                stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
-              }
-
-              if (char === '\n') {
-                return (
-                  <span
-                    key={index}
-                    ref={isCurrent ? activeCharRef : undefined}
-                    className={`${stateClass} inline-block w-full my-1 font-sans text-xs text-indigo-500 font-bold opacity-80`}
-                  >
-                    ⏎ [Paragraph Break - Press Enter]
-                  </span>
-                );
-              }
-
-              return (
-                <span
-                  key={index}
-                  ref={isCurrent ? activeCharRef : undefined}
-                  className={stateClass}
-                >
-                  {char === ' ' ? ' ' : char}
+          {/* Key Press Guide Box (tells user exactly which physical English key to press) */}
+          {nextExpectedKey && (
+            <div className="px-4 py-3 rounded-xl bg-slate-900 border border-blue-500/30 flex flex-wrap items-center justify-between gap-3 text-xs text-white">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-300">Expected Character:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-mono text-base font-black shadow-sm">
+                  {nextExpectedKey === ' ' ? 'SPACE' : nextExpectedKey}
                 </span>
-              );
-            })}
-          </div>
+              </div>
 
-          {/* Exam Typing Progress Bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-indigo-600 to-emerald-500 h-full transition-all duration-150"
-              style={{ width: `${Math.min(100, (typedText.length / Math.max(1, targetText.length)) * 100)}%` }}
-            />
-          </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-300">
+                  {selectedLang === 'hindi' ? '🇮🇳 Press English Key:' : '🇬🇧 Press Key:'}
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-sm font-extrabold flex items-center gap-1.5 shadow-sm">
+                  <KeyboardIcon className="w-4 h-4 text-amber-400" />
+                  {selectedLang === 'hindi'
+                    ? getEnglishKeyHintForHindi(nextExpectedKey).keyLabel
+                    : (nextExpectedKey === ' ' ? 'SPACEBAR' : nextExpectedKey.toUpperCase())}
+                </span>
+              </div>
+            </div>
+          )}
 
-          {/* Typing Area */}
-          <textarea
-            ref={inputRef}
-            value={typedText}
-            onChange={handleInputChange}
-            rows={4}
-            className="w-full p-3 sm:p-4 rounded-xl border border-blue-500 dark:border-blue-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-sm sm:text-base focus:outline-none ring-2 ring-blue-500/30 resize-none shadow-inner"
-            placeholder={selectedLang === 'hindi' ? 'यहाँ टाइप करना शुरू करें...' : 'Start typing the passage here...'}
-            autoFocus
-          />
+          {/* Passage Display & Typing Input Container (Splits 2-part side-by-side on Mobile Landscape) */}
+          <div className="mobile-landscape-split space-y-4">
+            {/* Left Part: Target Passage Box & Progress Bar */}
+            <div className="flex flex-col gap-2">
+              <div
+                ref={passageContainerRef}
+                onClick={() => inputRef.current?.focus()}
+                className="exam-text-box p-3 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-sm sm:text-base leading-relaxed max-h-36 sm:max-h-56 overflow-y-auto select-none tracking-wide relative scroll-smooth cursor-text flex-1"
+              >
+                {targetText.split('').map((char, index) => {
+                  const isCurrent = index === typedText.length;
+                  let stateClass = 'text-slate-400 dark:text-slate-500';
+                  if (index < typedText.length) {
+                    if (typedText[index] === char) {
+                      stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
+                    } else {
+                      stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
+                    }
+                  } else if (isCurrent) {
+                    stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
+                  }
+
+                  if (char === '\n') {
+                    return (
+                      <span
+                        key={index}
+                        ref={isCurrent ? activeCharRef : undefined}
+                        className={`${stateClass} inline-block w-full my-1 font-sans text-xs text-indigo-500 font-bold opacity-80`}
+                      >
+                        ⏎ [Paragraph Break - Press Enter]
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <span
+                      key={index}
+                      ref={isCurrent ? activeCharRef : undefined}
+                      className={stateClass}
+                    >
+                      {char === ' ' ? ' ' : char}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Exam Typing Progress Bar */}
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-indigo-600 to-emerald-500 h-full transition-all duration-150"
+                  style={{ width: `${Math.min(100, (typedText.length / Math.max(1, targetText.length)) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Right Part: Typing Area */}
+            <div className="relative flex flex-col">
+              <textarea
+                ref={inputRef}
+                value={typedText}
+                onChange={handleInputChange}
+                rows={4}
+                className="mobile-landscape-input w-full h-full min-h-[100px] p-3 sm:p-4 rounded-xl border border-blue-500 dark:border-blue-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-sm sm:text-base focus:outline-none ring-2 ring-blue-500/30 resize-none shadow-inner"
+                placeholder={selectedLang === 'hindi' ? 'यहाँ टाइप करना शुरू करें...' : 'Start typing the passage here...'}
+                autoFocus
+              />
+            </div>
+          </div>
 
           {/* Virtual Keyboard */}
           {showVirtualKeyboard && (
             <VirtualKeyboard
               expectedKey={nextExpectedKey}
+              language={selectedLang}
               showFingerGuide={true}
             />
           )}

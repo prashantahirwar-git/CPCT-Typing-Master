@@ -19,9 +19,9 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   const [showCustomModal, setShowCustomModal] = React.useState(false);
 
   const themes: { id: ThemeMode; name: string; icon: React.ReactNode; desc: string }[] = [
+    { id: 'light', name: 'Light', icon: <Sun className="w-4 h-4 text-amber-500" />, desc: 'Crisp paper contrast' },
     { id: 'purple', name: 'Purple', icon: <Sparkles className="w-4 h-4 text-purple-400" />, desc: 'Blackish blue & dark purple theme' },
     { id: 'dark', name: 'Dark', icon: <Moon className="w-4 h-4 text-indigo-400" />, desc: 'Eye-friendly midnight' },
-    { id: 'light', name: 'Light', icon: <Sun className="w-4 h-4 text-amber-500" />, desc: 'Crisp paper contrast' },
     { id: 'sepia', name: 'Sepia', icon: <Palette className="w-4 h-4 text-amber-700" />, desc: 'Warm reading tone' },
     { id: 'cyber', name: 'Cyber', icon: <Terminal className="w-4 h-4 text-emerald-400" />, desc: 'Retro matrix terminal' },
     { id: 'custom', name: 'Custom', icon: <Settings className="w-4 h-4 text-blue-400" />, desc: 'User-defined palette' }

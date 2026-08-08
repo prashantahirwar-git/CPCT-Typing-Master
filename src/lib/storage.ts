@@ -17,7 +17,7 @@ export function getStoredThemeMode(): ThemeMode {
   } catch (e) {
     console.error('Error reading theme mode:', e);
   }
-  return 'purple';
+  return 'light';
 }
 
 export function saveThemeMode(mode: ThemeMode): void {
@@ -65,8 +65,37 @@ export function getStoredProfile(): UserProfile {
   return DEFAULT_PROFILE;
 }
 
+export function renameStudentInLeaderboard(oldName: string, newName: string): void {
+  if (!oldName || !newName || oldName.trim() === newName.trim()) return;
+  try {
+    const raw = getStoredLeaderboard();
+    const oldNorm = oldName.trim().toLowerCase();
+    const newNorm = newName.trim();
+
+    let updated = false;
+    const modified = raw.map(e => {
+      if (e.studentName.trim().toLowerCase() === oldNorm) {
+        updated = true;
+        return { ...e, studentName: newNorm };
+      }
+      return e;
+    });
+
+    if (updated) {
+      const sanitized = sanitizeLeaderboard(modified);
+      localStorage.setItem(STORAGE_KEYS.LEADERBOARD, JSON.stringify(sanitized));
+    }
+  } catch (e) {
+    console.error('Error renaming student in leaderboard:', e);
+  }
+}
+
 export function saveProfile(profile: UserProfile): void {
   try {
+    const previous = getStoredProfile();
+    if (previous.name && profile.name && previous.name.trim() !== profile.name.trim()) {
+      renameStudentInLeaderboard(previous.name, profile.name);
+    }
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
   } catch (e) {
     console.error('Error saving profile:', e);
@@ -81,6 +110,124 @@ export function getStoredTests(): TestResult[] {
     console.error('Error reading tests:', e);
   }
   return [];
+}
+
+export function sanitizeLeaderboard(entries: LeaderboardEntry[]): LeaderboardEntry[] {
+  const bestMap = new Map<string, LeaderboardEntry>();
+
+  for (const entry of entries) {
+    if (!entry.studentName || !entry.studentName.trim()) continue;
+    const normName = entry.studentName.trim().toLowerCase();
+    const key = `${normName}___${entry.language}`;
+
+    if (!bestMap.has(key)) {
+      bestMap.set(key, { ...entry, studentName: entry.studentName.trim() });
+    } else {
+      const existing = bestMap.get(key)!;
+      const isHigherWPM = entry.netWPM > existing.netWPM;
+      const isEqualWPMBetterAcc = entry.netWPM === existing.netWPM && entry.accuracy > existing.accuracy;
+
+      if (isHigherWPM || isEqualWPMBetterAcc) {
+        bestMap.set(key, { ...entry, studentName: entry.studentName.trim() });
+      }
+    }
+  }
+
+  const result = Array.from(bestMap.values());
+  result.sort((a, b) => {
+    if (b.netWPM !== a.netWPM) return b.netWPM - a.netWPM;
+    return b.accuracy - a.accuracy;
+  });
+
+  return result;
+}
+
+export function getStoredLeaderboard(): LeaderboardEntry[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.LEADERBOARD);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return sanitizeLeaderboard(parsed);
+      }
+    }
+  } catch (e) {
+    console.error('Error reading leaderboard:', e);
+  }
+  return sanitizeLeaderboard(INITIAL_LEADERBOARD);
+}
+
+export interface LeaderboardAddResult {
+  added: boolean;
+  isNewBest: boolean;
+  reason: 'new_entry' | 'improved' | 'lower_or_equal';
+  entry: LeaderboardEntry;
+  previousEntry?: LeaderboardEntry;
+}
+
+export function addLeaderboardEntry(entry: LeaderboardEntry): LeaderboardAddResult {
+  try {
+    const existing = getStoredLeaderboard();
+    const normName = entry.studentName.trim().toLowerCase();
+
+    // Check if student already has a record in this language
+    const prevIndex = existing.findIndex(
+      e => e.studentName.trim().toLowerCase() === normName && e.language === entry.language
+    );
+
+    if (prevIndex !== -1) {
+      const prev = existing[prevIndex];
+      const isHigherWPM = entry.netWPM > prev.netWPM;
+      const isEqualWPMBetterAcc = entry.netWPM === prev.netWPM && entry.accuracy > prev.accuracy;
+
+      if (isHigherWPM || isEqualWPMBetterAcc) {
+        existing[prevIndex] = {
+          ...entry,
+          studentName: entry.studentName.trim()
+        };
+        const sanitized = sanitizeLeaderboard(existing);
+        localStorage.setItem(STORAGE_KEYS.LEADERBOARD, JSON.stringify(sanitized));
+        return {
+          added: true,
+          isNewBest: true,
+          reason: 'improved',
+          entry: { ...entry, studentName: entry.studentName.trim() },
+          previousEntry: prev
+        };
+      } else {
+        // Lower or equal score — retain existing best record
+        return {
+          added: false,
+          isNewBest: false,
+          reason: 'lower_or_equal',
+          entry: prev,
+          previousEntry: prev
+        };
+      }
+    } else {
+      // First record for this student name in this language
+      existing.push({
+        ...entry,
+        studentName: entry.studentName.trim()
+      });
+      const sanitized = sanitizeLeaderboard(existing);
+      localStorage.setItem(STORAGE_KEYS.LEADERBOARD, JSON.stringify(sanitized));
+      return {
+        added: true,
+        isNewBest: true,
+        reason: 'new_entry',
+        entry: { ...entry, studentName: entry.studentName.trim() }
+      };
+    }
+  } catch (e) {
+    console.error('Error updating leaderboard:', e);
+    return {
+      added: false,
+      isNewBest: false,
+      reason: 'lower_or_equal',
+      entry
+    };
+  }
 }
 
 export function saveTestResult(result: TestResult): void {
@@ -117,14 +264,14 @@ export function saveTestResult(result: TestResult): void {
     profile.unlockedBadges = Array.from(newBadges);
     saveProfile(profile);
 
-    // Auto add to leaderboard if exam mode
-    if (result.mode === 'simulated_exam') {
+    // Auto submit to leaderboard for all test modes if Net WPM > 0
+    if (result.netWPM > 0) {
       addLeaderboardEntry({
         id: 'lb_' + Date.now(),
         studentName: profile.name || 'CPCT Aspirant',
         netWPM: result.netWPM,
         accuracy: result.accuracy,
-        testMode: 'Simulated CPCT Exam',
+        testMode: result.mode === 'simulated_exam' ? 'Simulated CPCT Exam' : 'Practice Session',
         language: result.language,
         date: today,
         badge: result.cpctGrade
@@ -137,26 +284,6 @@ export function saveTestResult(result: TestResult): void {
     }
   } catch (e) {
     console.error('Error saving test result:', e);
-  }
-}
-
-export function getStoredLeaderboard(): LeaderboardEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.LEADERBOARD);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Error reading leaderboard:', e);
-  }
-  return INITIAL_LEADERBOARD;
-}
-
-export function addLeaderboardEntry(entry: LeaderboardEntry): void {
-  try {
-    const existing = getStoredLeaderboard();
-    const updated = [...existing, entry].sort((a, b) => b.netWPM - a.netWPM).slice(0, 50);
-    localStorage.setItem(STORAGE_KEYS.LEADERBOARD, JSON.stringify(updated));
-  } catch (e) {
-    console.error('Error updating leaderboard:', e);
   }
 }
 

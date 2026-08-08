@@ -58,8 +58,13 @@ export const ScoreCertificateModal: React.FC<ScoreCertificateModalProps> = ({
               Official Performance Scorecard
             </h2>
             <p className="text-xs text-slate-500">
-              Generated on {new Date(result.timestamp).toLocaleDateString()} for {studentName}
+              Generated on {new Date(result.timestamp).toLocaleDateString()} for <span className="font-bold text-slate-900 dark:text-white">{studentName}</span>
             </p>
+            <div className="pt-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-[11px] font-bold">
+                🏆 Submitted to Leaderboard • Highest Net WPM & Accuracy Recorded for {result.language.toUpperCase()}
+              </span>
+            </div>
           </div>
 
           {/* Grade Badge */}

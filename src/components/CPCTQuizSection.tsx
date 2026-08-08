@@ -2,13 +2,74 @@ import React from 'react';
 import { QuizQuestion, CPCT_QUIZ_QUESTIONS } from '../data/quizQuestions';
 import { soundEngine } from '../lib/audio';
 import {
+  getQuestionsFromCache,
+  saveQuestionsToCache,
+  clearQuizCache,
+  getCacheInfo,
+  exportQuestionsJSON,
+  CacheInfo
+} from '../lib/quizCache';
+import {
   HelpCircle, CheckCircle2, XCircle, RotateCcw, Award, ArrowRight,
-  BookOpen, Sparkles, Filter, Check, Clock, Volume2
+  BookOpen, Sparkles, Filter, Check, Clock, Volume2, Download, HardDrive,
+  Database, RefreshCw, Trash2, FileDown, WifiOff, Zap
 } from 'lucide-react';
 
 export const CPCTQuizSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
   const [lang, setLang] = React.useState<'hi' | 'en'>('hi'); // Default to Hindi as requested
+
+  // Local Offline Cache State
+  const [questionsBank, setQuestionsBank] = React.useState<QuizQuestion[]>(() => {
+    const cached = getQuestionsFromCache();
+    return (cached && cached.length > 0) ? cached : CPCT_QUIZ_QUESTIONS;
+  });
+  const [cacheStatus, setCacheStatus] = React.useState<CacheInfo>(() => getCacheInfo());
+  const [cacheNotice, setCacheNotice] = React.useState<string | null>(null);
+
+  // Automatically seed local cache on initial load if empty
+  React.useEffect(() => {
+    if (!cacheStatus.isCached) {
+      const success = saveQuestionsToCache(CPCT_QUIZ_QUESTIONS);
+      if (success) {
+        const updatedInfo = getCacheInfo();
+        setCacheStatus(updatedInfo);
+        const cachedQs = getQuestionsFromCache();
+        if (cachedQs) setQuestionsBank(cachedQs);
+        setCacheNotice('⚡ All 230+ MCQs auto-saved to local browser cache! Offline mode active.');
+        setTimeout(() => setCacheNotice(null), 4000);
+      }
+    }
+  }, []);
+
+  const handleDownloadToCache = () => {
+    const success = saveQuestionsToCache(CPCT_QUIZ_QUESTIONS);
+    if (success) {
+      const updatedInfo = getCacheInfo();
+      setCacheStatus(updatedInfo);
+      const cachedQs = getQuestionsFromCache();
+      if (cachedQs) setQuestionsBank(cachedQs);
+      soundEngine.playKeyPress();
+      setCacheNotice(`✅ Successfully saved ${CPCT_QUIZ_QUESTIONS.length} MCQs (${updatedInfo.sizeKb} KB) to local storage!`);
+      setTimeout(() => setCacheNotice(null), 4000);
+    }
+  };
+
+  const handleClearCache = () => {
+    clearQuizCache();
+    setCacheStatus(getCacheInfo());
+    setQuestionsBank(CPCT_QUIZ_QUESTIONS);
+    soundEngine.playError();
+    setCacheNotice('🗑️ Local MCQ cache cleared. Using bundled data.');
+    setTimeout(() => setCacheNotice(null), 4000);
+  };
+
+  const handleExportJSON = () => {
+    exportQuestionsJSON(questionsBank);
+    soundEngine.playKeyPress();
+    setCacheNotice('📥 Exported MCQ Question Bank JSON file!');
+    setTimeout(() => setCacheNotice(null), 4000);
+  };
 
   const categories = [
     'All',
@@ -21,9 +82,9 @@ export const CPCTQuizSection: React.FC = () => {
 
   // Filtered Question List
   const filteredQuestions = React.useMemo(() => {
-    if (selectedCategory === 'All') return CPCT_QUIZ_QUESTIONS;
-    return CPCT_QUIZ_QUESTIONS.filter(q => q.category === selectedCategory);
-  }, [selectedCategory]);
+    if (selectedCategory === 'All') return questionsBank;
+    return questionsBank.filter(q => q.category === selectedCategory);
+  }, [selectedCategory, questionsBank]);
 
   const [currentIndex, setCurrentIndex] = React.useState<number>(0);
   const [selectedOption, setSelectedOption] = React.useState<number | null>(null);
@@ -91,7 +152,7 @@ export const CPCTQuizSection: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-blue-500/30 border border-blue-400/40 text-blue-200 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> CPCT MCQ Paper Practice
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> CPCT MCQ Practice (230+ Questions)
             </span>
           </div>
           <h2 className="text-xl sm:text-3xl font-black tracking-tight">
@@ -124,6 +185,77 @@ export const CPCTQuizSection: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Local Offline Cache Control Bar */}
+      <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 text-xs">
+          <div className={`p-2 rounded-xl flex items-center justify-center ${
+            cacheStatus.isCached
+              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300/50'
+              : 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-300/50'
+          }`}>
+            <HardDrive className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <span>Local Offline Cache Status:</span>
+              {cacheStatus.isCached ? (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-black text-[11px] border border-emerald-500/30">
+                  ⚡ 200+ MCQs Cached
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-black text-[11px] border border-amber-500/30">
+                  ⚠️ Local Storage Empty
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {cacheStatus.isCached
+                ? `${cacheStatus.count} questions stored (${cacheStatus.sizeKb} KB) in browser storage. Zero fetching needed.`
+                : 'Download all 230+ questions to local cache for instant offline practice without network calls.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Cache Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap text-xs">
+          <button
+            onClick={handleDownloadToCache}
+            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-sm flex items-center gap-1.5"
+            title="Download full 200+ MCQ question set into browser local cache"
+          >
+            <Download className="w-3.5 h-3.5" />
+            {cacheStatus.isCached ? 'Update Cache' : 'Download to Local Cache'}
+          </button>
+
+          <button
+            onClick={handleExportJSON}
+            className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold transition-all border border-slate-300 dark:border-slate-700 flex items-center gap-1.5"
+            title="Export full MCQ question bank as a .json file"
+          >
+            <FileDown className="w-3.5 h-3.5 text-blue-500" />
+            Export JSON
+          </button>
+
+          {cacheStatus.isCached && (
+            <button
+              onClick={handleClearCache}
+              className="px-2.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 font-bold transition-all border border-rose-200 dark:border-rose-900/60 flex items-center gap-1"
+              title="Clear local browser storage cache"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Notification Toast */}
+      {cacheNotice && (
+        <div className="p-3 rounded-xl bg-blue-600 text-white font-extrabold text-xs shadow-lg flex items-center justify-between animate-fadeIn">
+          <span>{cacheNotice}</span>
+          <button onClick={() => setCacheNotice(null)} className="text-white/80 hover:text-white text-xs font-bold px-1">✕</button>
+        </div>
+      )}
 
       {/* Category Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
@@ -160,6 +292,22 @@ export const CPCTQuizSection: React.FC = () => {
               <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">
                 Question {currentIndex + 1} of {filteredQuestions.length}
               </span>
+              {/* Question Jump Selector */}
+              <select
+                value={currentIndex}
+                onChange={(e) => {
+                  setCurrentIndex(Number(e.target.value));
+                  setSelectedOption(null);
+                  setIsAnswerSubmitted(false);
+                }}
+                className="ml-2 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {filteredQuestions.map((_, idx) => (
+                  <option key={idx} value={idx}>
+                    Q{idx + 1}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex items-center gap-3 text-xs font-black">

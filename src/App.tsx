@@ -149,7 +149,10 @@ export default function App() {
         )}
 
         {activeTab === 'leaderboard' && (
-          <SocialLeaderboard currentStudentName={profile.name} />
+          <SocialLeaderboard
+            currentStudentName={profile.name}
+            onUpdateStudentName={handleUpdateProfileName}
+          />
         )}
       </main>
 

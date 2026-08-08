@@ -1,4 +1,5 @@
 import React from 'react';
+import appLogo from '../assets/images/cpct_app_logo_1786160308196.jpg';
 import { ThemeMode, CustomThemeColors, UserProfile } from '../types';
 import { ThemeSelector } from './ThemeSelector';
 import { soundEngine } from '../lib/audio';
@@ -175,13 +176,18 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 sm:py-3 flex flex-wrap items-center justify-between gap-1.5 sm:gap-3">
         {/* Logo & App Brand */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className={`p-1.5 sm:p-2.5 rounded-xl border ${style.logoBg}`}>
-            <Keyboard className="w-4 h-4 sm:w-6 sm:h-6" />
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-blue-400/40 shadow-md flex-shrink-0 bg-slate-900 ring-2 ring-blue-500/20">
+            <img
+              src={appLogo}
+              alt="CPCT Typing Hub Logo"
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <h1 className={`text-base sm:text-2xl font-black tracking-wide ${style.titleText}`}>
-                CPCT Typing Master
+                CPCT Typing Hub
               </h1>
               <span className={`px-2 py-0.5 rounded-md border font-extrabold text-[9px] sm:text-[10px] tracking-wide shadow-sm hidden sm:inline-block ${style.tagBg}`}>
                 20-50 Days Prep

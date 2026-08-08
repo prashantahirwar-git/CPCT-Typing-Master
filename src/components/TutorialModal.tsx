@@ -39,7 +39,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
   const steps = [
     {
-      title: 'Welcome to CPCT Typing Master',
+      title: 'Welcome to CPCT Typing Hub',
       icon: <Award className="w-8 h-8 text-purple-300" />,
       content: (
         <div className="space-y-3 text-sm text-purple-100">

@@ -158,7 +158,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="mt-12 py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>CPCT Typing Master — Specialized 20-50 Day Exam Preparation Engine</p>
+        <p>CPCT Typing Hub — Specialized 20-50 Day Exam Preparation Engine</p>
         <p className="mt-1 text-[11px] opacity-70">
           100% Local Device Storage • Zero Server Latency • Private & Offline Accessible
         </p>

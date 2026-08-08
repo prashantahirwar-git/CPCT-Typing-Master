@@ -28,7 +28,8 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
   const [isExamStarted, setIsExamStarted] = React.useState<boolean>(false);
   const [hasStartedTyping, setHasStartedTyping] = React.useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = React.useState<boolean>(false);
-  const [showVirtualKeyboard, setShowVirtualKeyboard] = React.useState<boolean>(true);
+  const [showVirtualKeyboard, setShowVirtualKeyboard] = React.useState<boolean>(false); // Default hidden in official exam mode
+  const [tcsIonMode, setTcsIonMode] = React.useState<boolean>(true); // Official TCS iON Mode (No Green/Red color cues)
 
   const [timeLeftSeconds, setTimeLeftSeconds] = React.useState<number>(15 * 60);
   const [typedText, setTypedText] = React.useState<string>('');
@@ -76,17 +77,20 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
     return getExtendedPassageContent(activePassage, examDurationMinutes);
   }, [activePassage, examDurationMinutes]);
 
-  // Auto-scroll passage view to keep active typing character in view
+  // Synchronized Line-by-Line Auto-Scroll keep active typing character in top 30% view frame
   React.useEffect(() => {
     if (isExamStarted && activeCharRef.current && passageContainerRef.current) {
       const charElem = activeCharRef.current;
       const container = passageContainerRef.current;
       const charTop = charElem.offsetTop;
-      const containerHeight = container.clientHeight;
-      container.scrollTo({
-        top: Math.max(0, charTop - containerHeight / 2 + 20),
-        behavior: 'smooth'
-      });
+      
+      const targetScrollTop = Math.max(0, charTop - 36);
+      if (Math.abs(container.scrollTop - targetScrollTop) > 10) {
+        container.scrollTo({
+          top: targetScrollTop,
+          behavior: 'smooth'
+        });
+      }
     }
   }, [typedText.length, isExamStarted]);
 
@@ -350,7 +354,7 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
 
             {/* Backspace Mode */}
             <div className="space-y-1.5">
-              <label className="font-semibold text-slate-700 dark:text-slate-300">Backspace Mode</label>
+              <label className="font-semibold text-slate-700 dark:text-slate-300">Backspace Rule</label>
               <button
                 onClick={() => setStrictBackspace(!strictBackspace)}
                 className={`w-full py-2.5 px-3 rounded-xl border font-bold text-left flex items-center justify-between transition-all ${
@@ -360,6 +364,38 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
                 }`}
               >
                 <span>{strictBackspace ? 'Strict Official Mode' : 'Unrestricted Backspace'}</span>
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* TCS iON Highlighting Mode Toggle */}
+            <div className="space-y-1.5">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">Word-Highlighting Engine</label>
+              <button
+                onClick={() => setTcsIonMode(!tcsIonMode)}
+                className={`w-full py-2.5 px-3 rounded-xl border font-bold text-left flex items-center justify-between transition-all ${
+                  tcsIonMode
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                }`}
+              >
+                <span>{tcsIonMode ? 'Official TCS iON (No Green/Red Colors)' : 'Training Mode (Color Highlights)'}</span>
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Virtual Keyboard Toggle */}
+            <div className="space-y-1.5">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">Virtual Keyboard Display</label>
+              <button
+                onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
+                className={`w-full py-2.5 px-3 rounded-xl border font-bold text-left flex items-center justify-between transition-all ${
+                  !showVirtualKeyboard
+                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400'
+                    : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <span>{!showVirtualKeyboard ? 'Hidden (Official Exam Screen)' : 'Visible On-Screen Keyboard'}</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
             </div>
@@ -419,7 +455,7 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
                 <span className="font-mono font-bold text-amber-400 text-base">{backspaceCount}</span>
               </div>
 
-              {/* Fullscreen & Keyboard Toggles */}
+              {/* Fullscreen, Keyboard & Highlighting Toggles */}
               <button
                 onClick={toggleFullscreen}
                 title={isFullscreen ? 'Exit Fullscreen' : 'Enter Mobile Fullscreen'}
@@ -427,6 +463,18 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 <span className="hidden sm:inline">{isFullscreen ? 'Exit' : 'Full'}</span>
+              </button>
+
+              <button
+                onClick={() => setTcsIonMode(!tcsIonMode)}
+                title="Toggle TCS iON Highlighting Mode"
+                className={`p-2 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all ${
+                  tcsIonMode
+                    ? 'bg-amber-600/20 border-amber-500/50 text-amber-300'
+                    : 'bg-emerald-600/20 border-emerald-500/50 text-emerald-300'
+                }`}
+              >
+                <span className="hidden sm:inline">{tcsIonMode ? 'TCS iON (No Colors)' : 'Training Colors'}</span>
               </button>
 
               <button
@@ -439,7 +487,7 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
                 }`}
               >
                 <KeyboardIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Keyboard</span>
+                <span className="hidden sm:inline">{showVirtualKeyboard ? 'Keyboard Visible' : 'Keyboard Hidden'}</span>
               </button>
 
               <button
@@ -495,14 +543,25 @@ export const SimulatedExamTest: React.FC<SimulatedExamTestProps> = ({
                 {targetText.split('').map((char, index) => {
                   const isCurrent = index === typedText.length;
                   let stateClass = 'text-slate-400 dark:text-slate-500';
-                  if (index < typedText.length) {
-                    if (typedText[index] === char) {
-                      stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
-                    } else {
-                      stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
+
+                  if (tcsIonMode) {
+                    // Official TCS iON Engine Mode: No green/red color highlighting on typed text
+                    if (index < typedText.length) {
+                      stateClass = 'text-slate-900 dark:text-slate-100 font-semibold';
+                    } else if (isCurrent) {
+                      stateClass = 'bg-blue-600 text-white font-bold rounded px-0.5 shadow-sm';
                     }
-                  } else if (isCurrent) {
-                    stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
+                  } else {
+                    // Training Mode: Green for correct, Red for error
+                    if (index < typedText.length) {
+                      if (typedText[index] === char) {
+                        stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
+                      } else {
+                        stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
+                      }
+                    } else if (isCurrent) {
+                      stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
+                    }
                   }
 
                   if (char === '\n') {

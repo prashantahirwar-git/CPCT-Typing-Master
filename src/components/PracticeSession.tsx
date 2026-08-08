@@ -31,6 +31,7 @@ export const PracticeSession: React.FC<PracticeSessionProps> = ({ onFinishPracti
   const [isFinished, setIsFinished] = React.useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = React.useState<boolean>(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = React.useState<boolean>(true);
+  const [tcsIonMode, setTcsIonMode] = React.useState<boolean>(false); // Toggleable TCS iON mode without green/red highlights
 
   const [timeLeft, setTimeLeft] = React.useState<number>(180);
   const [typedText, setTypedText] = React.useState<string>('');
@@ -89,17 +90,20 @@ export const PracticeSession: React.FC<PracticeSessionProps> = ({ onFinishPracti
     }
   };
 
-  // Auto-scroll passage view to keep active typing position centered
+  // Synchronized Line-by-Line Auto-scroll passage view to keep active typing position centered/visible
   React.useEffect(() => {
     if (isStarted && activeCharRef.current && passageContainerRef.current) {
       const charElem = activeCharRef.current;
       const container = passageContainerRef.current;
       const charTop = charElem.offsetTop;
-      const containerHeight = container.clientHeight;
-      container.scrollTo({
-        top: Math.max(0, charTop - containerHeight / 2 + 20),
-        behavior: 'smooth'
-      });
+      
+      const targetScrollTop = Math.max(0, charTop - 36);
+      if (Math.abs(container.scrollTop - targetScrollTop) > 10) {
+        container.scrollTo({
+          top: targetScrollTop,
+          behavior: 'smooth'
+        });
+      }
     }
   }, [typedText.length, isStarted]);
 
@@ -502,16 +506,28 @@ export const PracticeSession: React.FC<PracticeSessionProps> = ({ onFinishPracti
               </button>
 
               <button
+                onClick={() => setTcsIonMode(!tcsIonMode)}
+                title="Toggle TCS iON Highlighting Mode"
+                className={`p-2 rounded-xl border transition-all text-xs font-medium flex items-center gap-1 ${
+                  tcsIonMode
+                    ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold'
+                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                <span className="hidden sm:inline">{tcsIonMode ? 'TCS iON (No Colors)' : 'Training Colors'}</span>
+              </button>
+
+              <button
                 onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
                 title="Toggle Virtual Keyboard"
                 className={`p-2 rounded-xl border transition-all text-xs font-medium flex items-center gap-1 ${
                   showVirtualKeyboard
-                    ? 'border-blue-500/40 bg-blue-500/10 text-blue-500'
+                    ? 'border-blue-500/40 bg-blue-500/10 text-blue-500 font-bold'
                     : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
                 }`}
               >
                 <KeyboardIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Keyboard</span>
+                <span className="hidden sm:inline">{showVirtualKeyboard ? 'Keyboard Visible' : 'Keyboard Hidden'}</span>
               </button>
 
               <button
@@ -567,14 +583,25 @@ export const PracticeSession: React.FC<PracticeSessionProps> = ({ onFinishPracti
                 {targetText.split('').map((char, index) => {
                   const isCurrent = index === typedText.length;
                   let stateClass = 'text-slate-400 dark:text-slate-500';
-                  if (index < typedText.length) {
-                    if (typedText[index] === char) {
-                      stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
-                    } else {
-                      stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
+
+                  if (tcsIonMode) {
+                    // Official TCS iON Engine Mode: No green/red color highlighting on typed text
+                    if (index < typedText.length) {
+                      stateClass = 'text-slate-900 dark:text-slate-100 font-semibold';
+                    } else if (isCurrent) {
+                      stateClass = 'bg-blue-600 text-white font-bold rounded px-0.5 shadow-sm';
                     }
-                  } else if (isCurrent) {
-                    stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
+                  } else {
+                    // Training Mode: Green for correct, Red for error
+                    if (index < typedText.length) {
+                      if (typedText[index] === char) {
+                        stateClass = 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold';
+                      } else {
+                        stateClass = 'bg-rose-500/30 text-rose-600 dark:text-rose-400 underline font-bold';
+                      }
+                    } else if (isCurrent) {
+                      stateClass = 'bg-indigo-600 text-white font-bold animate-pulse rounded px-0.5 shadow-sm';
+                    }
                   }
 
                   if (char === '\n') {
